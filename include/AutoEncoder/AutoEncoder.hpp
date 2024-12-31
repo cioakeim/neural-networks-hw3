@@ -12,7 +12,6 @@ protected:
 public:
   AutoEncoder(){};
 
-  void test();
 
 };
 
