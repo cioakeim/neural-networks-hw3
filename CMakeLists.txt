@@ -34,6 +34,11 @@ target_link_libraries(dummy PRIVATE mlp_lib)
 target_link_libraries(dummy PRIVATE aenc_lib)
 target_compile_options(dummy PRIVATE -O3 -Wall -Wextra)
 
+add_executable(pcaTest "${TESTS}/PCATest.cpp")
+target_link_libraries(pcaTest PRIVATE aenc_lib)
+target_link_libraries(pcaTest PRIVATE common_lib)
+target_compile_options(pcaTest PRIVATE -O3 -Wall -Wextra)
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)
 

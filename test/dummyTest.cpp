@@ -5,7 +5,6 @@
 #include "CommonLib/cifarHandlers.hpp"
 #include "MLP/ActivationFunctions.hpp"
 #include "MLP/MLP.hpp"
-#include "AutoEncoder/AutoEncoder.hpp"
 
 #define INPUT_SIZE 3072
 
@@ -30,9 +29,6 @@ int main(){
   et.stop();
 
   
-  AutoEncoder aenc;
-  aenc.test();
-  return 0;
 
   
 
