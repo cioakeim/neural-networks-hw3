@@ -17,6 +17,7 @@ set(AOCL_LAPACK_LIB "${AOCL_PATH}/libflame.so" CACHE PATH "LAPACK")
 
 add_subdirectory("${PROJECT_SOURCE_DIR}/src/CommonLib")
 add_subdirectory("${PROJECT_SOURCE_DIR}/src/MLP")
+add_subdirectory("${PROJECT_SOURCE_DIR}/src/AutoEncoder")
 
 # Standard CMake Structure 
 
@@ -30,6 +31,7 @@ set(TESTS "${PROJECT_SOURCE_DIR}/test")
 add_executable(dummy "${TESTS}/dummyTest.cpp")
 target_link_libraries(dummy PRIVATE common_lib)
 target_link_libraries(dummy PRIVATE mlp_lib)
+target_link_libraries(dummy PRIVATE aenc_lib)
 target_compile_options(dummy PRIVATE -O3 -Wall -Wextra)
 
 

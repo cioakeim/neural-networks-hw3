@@ -5,6 +5,7 @@
 #include "CommonLib/cifarHandlers.hpp"
 #include "MLP/ActivationFunctions.hpp"
 #include "MLP/MLP.hpp"
+#include "AutoEncoder/AutoEncoder.hpp"
 
 #define INPUT_SIZE 3072
 
@@ -27,6 +28,13 @@ int main(){
   */
   normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
   et.stop();
+
+  
+  AutoEncoder aenc;
+  aenc.test();
+  return 0;
+
+  
 
   std::cout<<"Cool"<<std::endl;
 

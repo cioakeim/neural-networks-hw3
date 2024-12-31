@@ -115,7 +115,7 @@ void normalizeImageDataset(E::MatrixXf& training_set,
   int pixels=training_set.rows()/channel_number;
   int training_sz=training_set.cols();
   int test_sz=test_set.cols();
-  for(size_t i=0;i<training_set.rows();i+=pixels){
+  for(int i=0;i<training_set.rows();i+=pixels){
     E::MatrixXf train_channel=training_set.block(i,0,pixels,training_sz);
     E::MatrixXf test_channel=test_set.block(i,0,pixels,test_sz);
     normalizeDataset(train_channel,test_channel);
