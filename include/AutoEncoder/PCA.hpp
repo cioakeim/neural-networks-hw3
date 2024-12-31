@@ -17,6 +17,8 @@ using LossFunction=std::function<float(const MatrixXf&,const MatrixXf&)>;
 */
 class PCAHandler{
 private:
+  std::string store_path;
+  
   const MatrixXf& data; //< All the data (training only used)
   MatrixXf covariance_matrix;
 
@@ -30,6 +32,7 @@ private:
 
 public:
   PCAHandler(const MatrixXf& data):data(data){};
+  void setStorePath(std::string store_path){this->store_path=store_path;}
 
   void createCovarianceMatrix();
 
@@ -41,6 +44,11 @@ public:
 
   float reconstructionMSE(const MatrixXf& dataset);
 
+  float info_percentage(int components_number);
+
+  void store();
+
+  void load();
 };
 
 #endif 

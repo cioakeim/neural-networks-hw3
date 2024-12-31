@@ -1,4 +1,5 @@
 #include "AutoEncoder/PCA.hpp"
+#include "CommonLib/basicFuncs.hpp"
 #include <iostream>
 
 
@@ -58,10 +59,11 @@ float PCAHandler::reconstructionMSE(const MatrixXf& dataset){
 }
 
 
-
-
-
-
-
-
+float PCAHandler::info_percentage(int components_number){
+  float energy=0;
+  for(int i=0;i<components_number;i++){
+    energy+=eigen_pairs[i].first;
+  }
+  return energy/total_energy;
+}
 

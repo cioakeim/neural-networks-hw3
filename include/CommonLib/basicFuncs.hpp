@@ -20,6 +20,10 @@ E::MatrixXf loadMatrixFromFile(const std::string file_path);
 void storeMatrixToFile(const std::string file_path,
                        const E::MatrixXf matrix);
 
+E::VectorXf loadVectorFromFile(const std::string file_path);
+
+void storeVectorToFile(const std::string file_path,
+                       const E::VectorXf vector);
 
 void normalizeDataset(E::MatrixXf& training_set,
                       E::MatrixXf& test_set);
@@ -29,7 +33,6 @@ void normalizeImageDataset(E::MatrixXf& training_set,
                            int channel_number);
 
 void shuffleDatasetInPlace(SampleMatrix& set);
-
 
 std::vector<int> stringToVector(std::string str);
 

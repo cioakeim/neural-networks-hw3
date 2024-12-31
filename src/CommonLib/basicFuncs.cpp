@@ -73,6 +73,33 @@ void storeMatrixToFile(const std::string file_path,
   }
 }
 
+E::VectorXf loadVectorFromFile(const std::string file_path){
+  std::ifstream file(file_path);
+  if(!file.is_open()){
+    std::cerr<<"Error in loading: "<<file_path<<std::endl;
+    exit(1);
+  }
+  int size;
+  file>>size;
+  E::VectorXf vector(size);
+  for(int i=0;i<size;i++){
+    file>>vector(i);
+  }
+  return vector;
+}
+
+void storeVectorToFile(const std::string file_path,
+                       const E::VectorXf vector){
+  std::ofstream file(file_path);
+  if(file.is_open()){
+    file<<vector.size()<<"\n"; // Dimensions
+    file<<vector<<"\n";
+  }
+  else{
+    std::cerr<<"Error in storing: "<<file_path<<std::endl;
+    exit(1);
+  }
+}
 
 void shuffleDatasetInPlace(SampleMatrix& set){
   const int training_size=set.vectors.cols();
