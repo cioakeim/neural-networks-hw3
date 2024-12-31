@@ -39,6 +39,8 @@ public:
 
   void createPrincipalComponents(float info_percentage);
 
+  float reconstructionMSE(const MatrixXf& dataset);
+
 };
 
 #endif 

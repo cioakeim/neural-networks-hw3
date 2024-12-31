@@ -47,4 +47,21 @@ void PCAHandler::createPrincipalComponents(float info_percentage){
       break;
   }
   createPrincipalComponents(last_idx+1);
+  std::cout<<"Components number: "<<principal_components.cols()<<std::endl;
 }
+
+
+float PCAHandler::reconstructionMSE(const MatrixXf& dataset){
+  MatrixXf reconstruction = principal_components*
+    principal_components.transpose()*dataset;
+  return (reconstruction-dataset).array().pow(2).mean();
+}
+
+
+
+
+
+
+
+
+

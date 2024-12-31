@@ -8,8 +8,8 @@
 int main(){
   std::string dataset_path="../data/cifar-10-batches-bin";
   int training_size=50000;
-  int test_size=1000;
-  float info_percentage=0.9;
+  int test_size=10000;
+  float info_percentage=0.95;
 
   EventTimer et;
   et.start("Load dataset");
@@ -41,6 +41,14 @@ int main(){
   pca.createPrincipalComponents(info_percentage);
   et.stop();
   std::cout<<"Done"<<std::endl;
+
+  et.start("Training test");
+  std::cout<<"MSE Train: "<<pca.reconstructionMSE(training_set.vectors)<<std::endl;
+  et.stop();
+
+  et.start("Test test");
+  std::cout<<"MSE Test: "<<pca.reconstructionMSE(training_set.vectors)<<std::endl;
+  et.stop();
 
   et.displayIntervals();
 }
