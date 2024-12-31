@@ -69,45 +69,35 @@ void FeedForwardLayer::init(){
 }
 
 
-// Forward (in case of manual input or of previous one's)
-void FeedForwardLayer::forward(const MatrixXf& input){
+void FeedForwardLayer::forward(const PassContext& context){
+  const MatrixXf& input=(previous==nullptr)?context.input:previous->outputRef();
   output=f((weights*input).colwise()+biases.col(0));
-  //std::cout<<"Out div: "<< output.array().sqrt().mean()<<std::endl;
 }
 
 
-void FeedForwardLayer::forward(){
-  const MatrixXf& input=previous->outputRef();
-  forward(input);
-}
-
-
-float FeedForwardLayer::loss(const VectorXi& labels){
-  std::cerr<<"Feedforward CAN'T RETURN LOSS.."<<std::endl;
+float FeedForwardLayer::loss(const PassContext& context){
+  std::cerr<<"Base feedforward can't return loss"<<std::endl;
   exit(1);
 }
 
 
 // Backward (same idea as above)
-void FeedForwardLayer::backward(const MatrixXf& input,
-                                const VectorXi& labels){
-  std::cerr<<"Feedforward CAN'T INIT ERRORS.."<<std::endl;
-  exit(1);
-}
-
-
-void FeedForwardLayer::backward(const MatrixXf& input){
+void FeedForwardLayer::backward(const PassContext& context){
+  if(next==nullptr){
+    std::cerr<<"Base feedforward can't be output layer, can't backprop.."<<std::endl;
+    exit(1);
+  }
   const E::MatrixXf& error=next->inputErrorRef();
   //std::cout<<"Next error: "<<error.array().pow(2).mean()<<std::endl;
-  const E::MatrixXf& in=(previous==nullptr)?input:previous->outputRef();
+  const E::MatrixXf& in=(previous==nullptr)?context.input:previous->outputRef();
   //std::cout<<"Input error: "<<in.array().pow(2).mean()<<std::endl;
   if(previous!=nullptr){
     MatFunction func=previous->getFDot();
     input_error=(weights.transpose()*error).cwiseProduct(func(in));
     //std::cout<<"Error div: "<<input_error.array().pow(2).mean()<<std::endl;
   }
-  updateWeights(in,error);
-
+  if(!lockWeights)
+    updateWeights(in,error);
 }
 
 // For updating

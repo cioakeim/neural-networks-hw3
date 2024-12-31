@@ -17,6 +17,7 @@ protected:
   int batch_size;
   float rate;
 
+  bool lockWeights=false;
 
   // For updating
   Optimizer weights_opt;
@@ -30,17 +31,19 @@ public:
   void configure(LayerConfig config) override;
   void init() override;
 
-  // Forward (in case of manual input or of previous one's)
-  void forward(const MatrixXf& input) override;
-  void forward() override;
+  // Locking 
+  void lock(){lockWeights=true;}
+  void unlock(){lockWeights=false;}
 
-  float loss(const VectorXi& labels) override;
-  int prediction_success(const VectorXi& labels) override{return -1;}
+  // Forward (in case of manual input or of previous one's)
+  void forward(const PassContext& context) override;
+
+  float loss(const PassContext& context) override;
+  int prediction_success(const PassContext& context) override{return -1;}
 
   // Backward (same idea as above)
-  void backward(const MatrixXf& input,
-                const VectorXi& labels) override;
-  void backward(const MatrixXf& input) override;
+  // For Feedforward loss function is MSE
+  void backward(const PassContext& context) override;
 
   // For updating
   void updateWeights(const MatrixXf& input,

@@ -2,8 +2,8 @@
 #include "CommonLib/basicFuncs.hpp"
 
 
-void SoftMaxLayer::forward(const MatrixXf& input){
-  FeedForwardLayer::forward(input);
+void SoftMaxLayer::forward(const PassContext& context){
+  FeedForwardLayer::forward(context);
   const E::RowVectorXf maxCoeff=output.colwise().maxCoeff();
   // Subtract for numerical stability and exp
   const MatrixXf exps=(output.rowwise()-maxCoeff).array().exp();
@@ -14,37 +14,33 @@ void SoftMaxLayer::forward(const MatrixXf& input){
 }
 
 
-void SoftMaxLayer::forward(){
-  const MatrixXf& input=previous->outputRef();
-  forward(input);
-}
-
-
-float SoftMaxLayer::loss(const VectorXi& labels){
-  int sample_size=labels.size();
+float SoftMaxLayer::loss(const PassContext& context){
+  int sample_size=context.labels.size();
   VectorXf loss_array(sample_size);
   #pragma omp parallel for
   for(int i=0;i<sample_size;i++){
-    loss_array(i)=log(output(labels(i),i));
+    loss_array(i)=log(output(context.labels(i),i));
   }
   return -loss_array.sum();
 }
 
 
-void SoftMaxLayer::backward(const MatrixXf& input,
-                            const VectorXi& labels){
+void SoftMaxLayer::backward(const PassContext& context){
   MatrixXf error=output;
   const int sample_size=output.cols();
   #pragma omp parallel for
   for(int i=0;i<sample_size;i++){
-    error(labels(i),i)--;
+    error(context.labels(i),i)--;
   }
-
-  
-  const E::MatrixXf& in=(previous==nullptr)?input:previous->outputRef();
-  MatFunction func=previous->getFDot();
-  input_error=(weights.transpose()*error).cwiseProduct(func(in));
-  updateWeights(in, error);
+  const E::MatrixXf& in=(previous==nullptr)?context.input:previous->outputRef();
+  // Pass backward if needed
+  if(previous!=nullptr){
+    MatFunction func=previous->getFDot();
+    input_error=(weights.transpose()*error).cwiseProduct(func(in));
+  } 
+  if(!lockWeights){
+    updateWeights(in, error);
+  }
   /**
   std::cout<<"Soft limits: "<<input_error.minCoeff()<<" "<<input_error.maxCoeff()<<std::endl;
   std::cout<<"Soft dims: "<<input_error.rows()<<" "<<input_error.cols()<<std::endl;
@@ -53,13 +49,13 @@ void SoftMaxLayer::backward(const MatrixXf& input,
 }
 
 
-int SoftMaxLayer::prediction_success(const VectorXi& labels){
+int SoftMaxLayer::prediction_success(const PassContext& context){
   int cnt=0;
-  int size=labels.size();
+  int size=context.labels.size();
   for(int i=0;i<size;i++){
     E::MatrixXf::Index idx;
     output.col(i).maxCoeff(&idx);
-    cnt+=(labels(i)==idx);
+    cnt+=(context.labels(i)==idx);
   }
   return cnt;
 }

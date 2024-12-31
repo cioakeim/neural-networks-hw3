@@ -48,9 +48,8 @@ public:
   void setStorePath(std::string path);
   void setBatchSize(int batch_size){this->batch_size=batch_size;}
 
-  void forward(const MatrixXf& input);
-  void backward(const MatrixXf& input,
-                const VectorXi& labels);
+  void forward(const PassContext& context);
+  void backward(const PassContext& context);
 
   float runEpoch();
 

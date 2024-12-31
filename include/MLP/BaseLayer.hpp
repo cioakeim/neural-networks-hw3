@@ -15,6 +15,14 @@ using E::VectorXi;
 using MatFunction = std::function<MatrixXf(const MatrixXf&)>;
 
 
+/**
+ * @brief Context of a pass
+ */
+struct PassContext{
+  const MatrixXf input;
+  const VectorXi labels;
+};
+
 
 /**
  * @brief Virtual class of layer object.
@@ -57,17 +65,15 @@ public:
   virtual void configure(LayerConfig config)=0;
   virtual void init()=0; 
 
-  // Forward (in case of manual input or of previous one's)
-  virtual void forward(const MatrixXf& input)=0;
-  virtual void forward()=0;
 
-  virtual float loss(const VectorXi& labels)=0;
-  virtual int prediction_success(const VectorXi& labels)=0;
+  // Forward
+  virtual void forward(const PassContext& context)=0;
+
+  virtual float loss(const PassContext& context)=0;
+  virtual int prediction_success(const PassContext& context)=0;
 
   // Backward (same idea as above)
-  virtual void backward(const MatrixXf& input,
-                        const VectorXi& labels)=0;
-  virtual void backward(const MatrixXf& input)=0;;
+  virtual void backward(const PassContext& context)=0;;
 
   // I/O
   virtual void store()=0;

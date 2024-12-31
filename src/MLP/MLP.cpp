@@ -44,21 +44,18 @@ void MLP::setStorePath(std::string path){
 }
 
 
-void MLP::forward(const MatrixXf& input){
-  layers[0]->forward(input);
+void MLP::forward(const PassContext& context){
   int size=layers.size();
-  for(int i=1;i<size;i++){
-    layers[i]->forward();
+  for(int i=0;i<size;i++){
+    layers[i]->forward(context);
   }
 }
 
 
-void MLP::backward(const MatrixXf& input,
-                   const VectorXi& labels){
+void MLP::backward(const PassContext& context){
   int size=layers.size();
-  layers[size-1]->backward(input,labels);
-  for(int i=size-2;i>=0;i--){
-    layers[i]->backward(input);
+  for(int i=size-1;i>=0;i--){
+    layers[i]->backward(context);
   }
 }
 
@@ -69,13 +66,15 @@ float MLP::runEpoch(){
   int training_sz=training_set.vectors.cols();
   int last_idx=layers.size()-1;
   for(int batch_idx=0;batch_idx<training_sz;batch_idx+=batch_size){
-    const MatrixXf& input=training_set.vectors.middleCols(batch_idx,batch_size);
-    const VectorXi& labels=training_set.labels.segment(batch_idx,batch_size);
+    const PassContext context{
+      training_set.vectors.middleCols(batch_idx,batch_size),
+      training_set.labels.segment(batch_idx,batch_size)
+    };
     //std::cout<<"Batch start"<<std::endl;
-    forward(input);
+    forward(context);
     //std::cout<<"Backward start"<<std::endl;
-    total_loss+=layers[last_idx]->loss(labels);
-    backward(input,labels);
+    total_loss+=layers[last_idx]->loss(context);
+    backward(context);
     //std::cout<<"Backward end"<<std::endl;
   }  
   return total_loss/training_sz;
@@ -89,11 +88,13 @@ void MLP::testModel(float& J_test,float& accuracy){
   int test_sz=training_set.vectors.cols();
   int last_idx=layers.size()-1;
   for(int batch_idx=0;batch_idx<test_sz;batch_idx+=batch_size){
-    const MatrixXf& input=training_set.vectors.middleCols(batch_idx,batch_size);
-    const VectorXi& labels=training_set.labels.segment(batch_idx,batch_size);
-    forward(input);
-    J_test+=layers[last_idx]->loss(labels);
-    success_count+=layers[last_idx]->prediction_success(labels);
+    const PassContext context{
+      test_set.vectors.middleCols(batch_idx,batch_size),
+      test_set.labels.segment(batch_idx,batch_size)
+    };
+    forward(context);
+    J_test+=layers[last_idx]->loss(context);
+    success_count+=layers[last_idx]->prediction_success(context);
   }  
   J_test/=test_sz;
   accuracy=static_cast<float>(success_count)/test_sz;

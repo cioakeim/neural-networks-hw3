@@ -8,14 +8,12 @@
 */
 class SoftMaxLayer: public FeedForwardLayer{
 
-  void forward(const MatrixXf& input) override;
-  void forward() override;
+  void forward(const PassContext& context) override;
 
-  float loss(const VectorXi& labels) override;
-  int prediction_success(const VectorXi& labels) override;
+  float loss(const PassContext& context) override;
+  int prediction_success(const PassContext& context) override;
 
-  void backward(const MatrixXf& input,
-                const VectorXi& labels) override;
+  void backward(const PassContext& context) override;
 
 };
 
