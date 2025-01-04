@@ -5,29 +5,27 @@
 #include <iostream>
 #include <fstream>
 
+static int getInterfaceVectorSize(std::shared_ptr<LayerInterface> interface){
+  return interface->height*interface->width*interface->channels;
+}
 
 // Initialization
 void FeedForwardLayer::configure(LayerConfig config){
   input_interface=config.input_interface;
+  output_interface=config.output_interface;
 
   // Allocate matrices
   int input_sz,output_sz;
-  input_sz=config.input_interface->size;
-  output_sz=config.ff_config.output_sz;
+  input_sz=getInterfaceVectorSize(config.input_interface);
+  output_sz=getInterfaceVectorSize(config.output_interface);
   std::cout<<"Init dimension: "<<input_sz<<" "<<output_sz<<std::endl;
   weights=MatrixXf(output_sz,input_sz);
   biases=MatrixXf(output_sz,1);
 
   // Init optimizers
-  weights_opt.configure(config.opt_config,weights);
-  biases_opt.configure(config.opt_config,biases);
+  weights_opt.configure(config.properties.opt_config,weights);
+  biases_opt.configure(config.properties.opt_config,biases);
 
-  // Define output interface
-  output_interface=std::make_shared<LayerInterface>();
-  output_interface->height=output_interface->size=output_sz;
-  output_interface->width=output_interface->channels=1;
-  output_interface->f=config.f;
-  output_interface->f_dot=config.f_dot;
   init();
 }
 

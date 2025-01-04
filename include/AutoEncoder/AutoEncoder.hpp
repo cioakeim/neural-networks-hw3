@@ -7,7 +7,7 @@
 /**
  * @brief Autoencoder class 
   */
-/**
+/*
 class AutoEncoder:MLP{
 protected:
   // Stack structure for layers: enc_stack[0]==in / dec_stack[0]==out
@@ -16,6 +16,8 @@ protected:
   std::vector<std::shared_ptr<BaseLayer>> dec_stack;
   std::shared_ptr<MatrixXf> encoded; //< Pointer to encoded output
 
+  // Move the 2 stacks to the layers
+  void convertToMLP();
 
 public:
   AutoEncoder(SampleMatrix& training_set,

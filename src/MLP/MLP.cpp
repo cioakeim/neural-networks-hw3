@@ -11,9 +11,15 @@
 namespace fs=std::filesystem;
 
 
-void MLP::addLayer(LayerConfig config){
+void MLP::addLayer(LayerProperties properties){
+  int last=interfaces.size()-1;
+  LayerConfig config;
+  config.properties=properties;
+  config.output_interface=interfaces[last];
+  config.input_interface=interfaces[last-1];
+
   // Create
-  switch(config.layer_type){
+  switch(properties.layer_type){
   case FeedForward:
     layers.push_back(std::make_shared<FeedForwardLayer>());
     break;
@@ -25,16 +31,25 @@ void MLP::addLayer(LayerConfig config){
     exit(1);
     break;
   }
-  // Chain
-  int last=layers.size()-1;
-  if(last==0){
-    config.input_interface->type=Input;
+  layers.back()->configure(config);
+}
+
+
+void MLP::addInterface(std::shared_ptr<LayerInterface> interface){
+  interfaces.push_back(interface);
+  int size=interfaces.size();
+  switch(size){
+  case 1:
+    interfaces.back()->type=Input;
+    break;
+  case 2:
+    interfaces.back()->type=Output;
+    break;
+  default:
+    interfaces.back()->type=Output;
+    interfaces[size-2]->type=Hidden;
+    break;
   }
-  else{
-    config.input_interface=layers[last-1]->getOutputInterface();
-    config.input_interface->type=Hidden;
-  }
-  layers[last]->configure(config);
 }
 
 

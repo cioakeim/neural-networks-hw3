@@ -29,8 +29,6 @@ struct LayerInterface{
   int height;
   int width;
   int channels;
-  // For convenience store total vector size
-  int size;
   // Forward and backward signals
   MatrixXf forward_signal;
   MatrixXf backward_signal;
@@ -49,6 +47,18 @@ struct CNNConfig{
 };
 
 enum LayerType{FeedForward,SoftMax,Convolutional,MSE};
+/**
+ * @brief What defines the properties of the black box
+ */
+struct LayerProperties{
+  // The type of the layer
+  LayerType layer_type;
+  // For optimizer
+  OptimizerConfig opt_config;
+
+};
+
+
 
 /**
  * @brief For configuring the base layer
@@ -56,17 +66,11 @@ enum LayerType{FeedForward,SoftMax,Convolutional,MSE};
  * Universal config struct and each type uses what is needs
  */
 struct LayerConfig{
-  LayerType layer_type;
+  // The interface
   std::shared_ptr<LayerInterface> input_interface;
-  // For all layers
-  MatFunction f,f_dot;
-  // FF
-  FFConfig ff_config;
-  // CNN
-  CNNConfig cnn_config;
-  // For optimizer
-  OptimizerConfig opt_config;
-
+  std::shared_ptr<LayerInterface> output_interface;
+  // The properties
+  LayerProperties properties;
 };
 
 

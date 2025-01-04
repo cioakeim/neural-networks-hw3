@@ -26,6 +26,7 @@ protected:
   std::string store_path;
   // Structure
   std::vector<std::shared_ptr<BaseLayer>> layers;
+  std::vector<std::shared_ptr<LayerInterface>> interfaces;
   // Training set
   SampleMatrix& training_set;
   SampleMatrix& test_set;
@@ -43,7 +44,8 @@ public:
   batch_size(batch_size){};
 
 
-  void addLayer(LayerConfig config);
+  void addLayer(LayerProperties properties);
+  void addInterface(std::shared_ptr<LayerInterface> interface);
 
   void setStorePath(std::string path);
   void setBatchSize(int batch_size){this->batch_size=batch_size;}
