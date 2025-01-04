@@ -14,7 +14,6 @@ protected:
   MatrixXf weights;
   MatrixXf biases;
 
-  bool lockWeights=false;
 
   // For updating
   Optimizer weights_opt;
@@ -28,9 +27,6 @@ public:
   void configure(LayerConfig config) override;
   void init() override;
 
-  // Locking 
-  void lock(){lockWeights=true;}
-  void unlock(){lockWeights=false;}
 
   // Forward (in case of manual input or of previous one's)
   void forward(const PassContext& context) override;

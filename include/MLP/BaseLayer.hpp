@@ -26,6 +26,8 @@ protected:
   // For interfacing with other layers
   std::shared_ptr<LayerInterface> input_interface=nullptr;
   std::shared_ptr<LayerInterface> output_interface=nullptr;
+  // For locking the parameters
+  bool lockParams=false;
 
 public:
   ~BaseLayer()=default;
@@ -38,6 +40,10 @@ public:
   void setOutputInterface(std::shared_ptr<LayerInterface> output_interface){
     this->output_interface=output_interface;
   }
+  // Locking 
+  void lock(){lockParams=true;}
+  void unlock(){lockParams=false;}
+
   std::shared_ptr<LayerInterface> getInputInterface(){return input_interface;}
   std::shared_ptr<LayerInterface> getOutputInterface(){return output_interface;}
 

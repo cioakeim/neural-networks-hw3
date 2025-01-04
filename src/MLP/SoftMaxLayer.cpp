@@ -44,7 +44,7 @@ void SoftMaxLayer::backward(const PassContext& context){
     input_interface->backward_signal=
       (weights.transpose()*error).cwiseProduct(func(in));
   } 
-  if(!lockWeights){
+  if(!lockParams){
     updateWeights(in, error);
   }
   /**
