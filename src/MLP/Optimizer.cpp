@@ -5,11 +5,12 @@
 #define DECAY 1e-8
 
 void Optimizer::setAdam(AdamConfig config){
-  mode=Adam;
-  this->rate=(config.rate/config.batch_size);
+  type=Adam;
+  this->rate=config.rate;
   this->epsilon=EPSILON;
   this->beta_1=this->beta_1t=config.beta_1;
   this->beta_2=this->beta_2t=config.beta_2;
+  this->batch_size=config.batch_size;
 
   m=MatrixXf(config.mat_rows,config.mat_cols).setZero();
   u=MatrixXf(config.mat_rows,config.mat_cols).setZero();
@@ -17,19 +18,33 @@ void Optimizer::setAdam(AdamConfig config){
 
 
 void Optimizer::setSGD(SGDConfig config){
-  mode=SGD;
-  this->rate=(config.rate/config.batch_size);
+  type=SGD;
+  this->rate=config.rate;
+}
+
+
+void Optimizer::configure(OptimizerConfig config,const MatrixXf& mat){
+  switch(config.type){
+  case SGD:
+    setSGD(config.sgd);
+    break;
+  case Adam:
+    config.adam.mat_rows=mat.rows();
+    config.adam.mat_cols=mat.cols();
+    setAdam(config.adam);
+    break;
+  }
 }
 
 
 void Optimizer::update(const MatrixXf& mat_gradients,
                        MatrixXf& mat){
-  switch(mode){
+  switch(type){
   case Adam:
     // Moment calculation
     m=beta_1*m+(1-beta_1)*mat_gradients;
     u.array()=beta_2*u.array()+
-                (1-beta_2)*mat_gradients.array().square();
+                (1-beta_2)*mat_gradients.array().square()*batch_size;
 
     // Calculate weights
     mat.array()-=(rate/(1-beta_1t))*

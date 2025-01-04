@@ -1,5 +1,6 @@
 #include "MLP/FeedForwardLayer.hpp"
 #include "CommonLib/basicFuncs.hpp"
+#include <memory>
 #include <random>
 #include <iostream>
 #include <fstream>
@@ -7,46 +8,26 @@
 
 // Initialization
 void FeedForwardLayer::configure(LayerConfig config){
+  input_interface=config.input_interface;
+
   // Allocate matrices
-  int input_sz,output_sz,batch_size;
-  if(previous==nullptr){
-    std::cout<<"FIRST LAYERS"<<std::endl;
-    input_sz=config.input_size;
-  }
-  else{
-    InterfaceParams param=previous->outputParamRef();
-    input_sz=param.height*param.width*param.channels;
-  }
-  output_sz=config.ff_config.feedforward_output;
-  batch_size=config.batch_size;
-
-
+  int input_sz,output_sz;
+  input_sz=config.input_interface->size;
+  output_sz=config.ff_config.output_sz;
   std::cout<<"Init dimension: "<<input_sz<<" "<<output_sz<<std::endl;
   weights=MatrixXf(output_sz,input_sz);
   biases=MatrixXf(output_sz,1);
-  output=MatrixXf(output_sz,batch_size);
-  input_error=MatrixXf(input_sz,batch_size);
-  f=config.f;
-  f_dot=config.f_dot;
+
   // Init optimizers
-  switch(config.optimizer_mode){
-  case SGD:
-    config.sgd_config.batch_size=config.batch_size;
-    weights_opt.setSGD(config.sgd_config);
-    biases_opt.setSGD(config.sgd_config);
-    break;
-  case Adam:
-    config.adam_config.batch_size=config.batch_size;
-    config.adam_config.mat_rows=output_sz;
-    config.adam_config.mat_cols=input_sz;
-    weights_opt.setAdam(config.adam_config);
-    config.adam_config.mat_cols=1;
-    biases_opt.setAdam(config.adam_config);
-    break;
-  }
-  // Set self out params
-  output_param.height=output_sz;
-  output_param.width=output_param.channels=1;
+  weights_opt.configure(config.opt_config,weights);
+  biases_opt.configure(config.opt_config,biases);
+
+  // Define output interface
+  output_interface=std::make_shared<LayerInterface>();
+  output_interface->height=output_interface->size=output_sz;
+  output_interface->width=output_interface->channels=1;
+  output_interface->f=config.f;
+  output_interface->f_dot=config.f_dot;
   init();
 }
 
@@ -70,31 +51,47 @@ void FeedForwardLayer::init(){
 
 
 void FeedForwardLayer::forward(const PassContext& context){
-  const MatrixXf& input=(previous==nullptr)?context.input:previous->outputRef();
-  output=f((weights*input).colwise()+biases.col(0));
+  const MatrixXf& input=(input_interface->type==Input)?
+    context.input:input_interface->forward_signal;
+  MatFunction f=output_interface->f;
+  output_interface->forward_signal=f((weights*input).colwise()+biases.col(0));
 }
 
 
 float FeedForwardLayer::loss(const PassContext& context){
-  std::cerr<<"Base feedforward can't return loss"<<std::endl;
-  exit(1);
+  MatrixXf loss=output_interface->forward_signal;
+  #pragma omp parallel for 
+  for(int i=0;i<loss.cols();i++){
+    loss(context.labels(i),i)--; 
+  }
+  return loss.colwise().mean().sum();   
 }
 
 
-// Backward (same idea as above)
+int FeedForwardLayer::prediction_success(const PassContext& context){
+  int success_count=0;
+  for(int i=0;i<context.labels.size();i++){
+    E::MatrixXf::Index idx;
+    output_interface->forward_signal.col(i).maxCoeff(&idx);
+    success_count+=(context.labels(i)==idx);
+  }
+  return success_count;
+}
+
+
+// Backward
 void FeedForwardLayer::backward(const PassContext& context){
-  if(next==nullptr){
+  if(output_interface->type==Output){
     std::cerr<<"Base feedforward can't be output layer, can't backprop.."<<std::endl;
     exit(1);
   }
-  const E::MatrixXf& error=next->inputErrorRef();
-  //std::cout<<"Next error: "<<error.array().pow(2).mean()<<std::endl;
-  const E::MatrixXf& in=(previous==nullptr)?context.input:previous->outputRef();
-  //std::cout<<"Input error: "<<in.array().pow(2).mean()<<std::endl;
-  if(previous!=nullptr){
-    MatFunction func=previous->getFDot();
-    input_error=(weights.transpose()*error).cwiseProduct(func(in));
-    //std::cout<<"Error div: "<<input_error.array().pow(2).mean()<<std::endl;
+  const E::MatrixXf& error=output_interface->backward_signal;
+  const E::MatrixXf& in=(input_interface->type==Input)?
+    context.input:input_interface->forward_signal;
+  if(input_interface->type!=Input){
+    MatFunction func=input_interface->f_dot;
+    input_interface->backward_signal=
+      (weights.transpose()*error).cwiseProduct(func(in));
   }
   if(!lockWeights)
     updateWeights(in,error);
@@ -107,8 +104,8 @@ void FeedForwardLayer::updateWeights(const MatrixXf& input,
   std::cout<<"Input: "<<input.rows()<<" "<<input.cols()<<std::endl;
   std::cout<<"Error: "<<error.rows()<<" "<<error.cols()<<std::endl;
   */
-  MatrixXf weight_grads=error*input.transpose();
-  MatrixXf bias_grads=error.rowwise().sum();
+  MatrixXf weight_grads=error*input.transpose()/input.cols();
+  MatrixXf bias_grads=error.rowwise().sum()/input.cols();
   weights_opt.update(weight_grads, weights);
   biases_opt.update(bias_grads, biases);
 }

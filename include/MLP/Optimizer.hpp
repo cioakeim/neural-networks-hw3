@@ -9,19 +9,26 @@ using E::VectorXf;
 using E::VectorXi;
 
 
-enum OptimizerMode{SGD,Adam};
+enum OptimizerType{SGD,Adam};
+
 
 struct SGDConfig{
   float rate;
-  int batch_size;
 };
 
 struct AdamConfig{
   float rate;
-  int batch_size;
   float beta_1;
   float beta_2;
+  int batch_size;
   int mat_rows,mat_cols;
+};
+
+
+struct OptimizerConfig{
+  OptimizerType type;
+  SGDConfig sgd;
+  AdamConfig adam;
 };
 
 /**
@@ -31,10 +38,11 @@ class Optimizer{
 private:
   // Universal 
   float rate;
-  OptimizerMode mode;
+  OptimizerType type;
   // For adam
   MatrixXf m;
   MatrixXf u;
+  int batch_size;
   float epsilon;
   float beta_1,beta_2;
   float beta_1t,beta_2t;
@@ -45,6 +53,8 @@ public:
   void setAdam(AdamConfig config);
                
   void setSGD(SGDConfig config);
+
+  void configure(OptimizerConfig config,const MatrixXf& mat);
 
   void update(const MatrixXf& mat_gradients,
               MatrixXf& mat);

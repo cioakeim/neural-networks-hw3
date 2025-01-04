@@ -6,7 +6,8 @@
 #include "MLP/ActivationFunctions.hpp"
 #include "MLP/MLP.hpp"
 
-#define INPUT_SIZE 3072
+#define INPUT_DIM 32
+#define INPUT_CHANNEL 3
 
 namespace E=Eigen;
 
@@ -39,28 +40,37 @@ int main(){
 
   LayerConfig config;
   std::vector<int> layer_sizes={1024,512,124};
-  config.batch_size=50;
   config.layer_type=FeedForward;
+  config.input_interface=std::make_shared<LayerInterface>();
+  config.input_interface->height=config.input_interface->width=32;
+  config.input_interface->channels=3;
+  config.input_interface->size=32*32*3;
   config.f=reLU;
   config.f_dot=reLUder;
-  config.input_size=INPUT_SIZE;
-  config.optimizer_mode=Adam;
-  config.adam_config.rate=1e-3;
-  config.adam_config.beta_1=0.9;
-  config.adam_config.beta_2=0.999;
+  config.opt_config.type=Adam;
+  config.opt_config.adam.batch_size=batch_size;
+  config.opt_config.adam.rate=1e-3;
+  config.opt_config.adam.beta_1=0.9;
+  config.opt_config.adam.beta_2=0.999;
+  /*
+  config.opt_config.type=SGD;
+  config.opt_config.sgd.rate=1e-3;
+  */
+
 
 
   for(auto l_size:layer_sizes){
-    config.ff_config.feedforward_output=l_size;
+    config.ff_config.output_sz=l_size;
     mlp.addLayer(config);
   }
   std::cout<<"Cool"<<std::endl;
-  config.ff_config.feedforward_output=10;
+  config.ff_config.output_sz=10;
   config.layer_type=SoftMax;
   mlp.addLayer(config);
 
   float loss;
 
+  std::cout<<"Epochs: "<<std::endl;
   for(int i=0;i<10;i++){
     loss=mlp.runEpoch();
     std::cout<<"Loss: "<<loss<<std::endl;

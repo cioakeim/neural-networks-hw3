@@ -13,9 +13,6 @@ protected:
   // Main components
   MatrixXf weights;
   MatrixXf biases;
-  // Changable parameters
-  int batch_size;
-  float rate;
 
   bool lockWeights=false;
 
@@ -38,8 +35,9 @@ public:
   // Forward (in case of manual input or of previous one's)
   void forward(const PassContext& context) override;
 
+  // Mean Square error of labels and prediction is on highest output
   float loss(const PassContext& context) override;
-  int prediction_success(const PassContext& context) override{return -1;}
+  int prediction_success(const PassContext& context) override;
 
   // Backward (same idea as above)
   // For Feedforward loss function is MSE

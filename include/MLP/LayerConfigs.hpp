@@ -7,6 +7,7 @@
 #endif
 
 #include <Eigen/Dense>
+#include <memory>
 #include "MLP/Optimizer.hpp"
 
 namespace E=Eigen;
@@ -16,25 +17,38 @@ using E::VectorXi;
 using MatFunction = std::function<MatrixXf(const MatrixXf&)>;
 
 
-enum LayerType{FeedForward,SoftMax,Convolutional};
+enum InterfaceType{Input,Hidden,Output};
+
 /**
- * @brief Mostly for convolutional layers to translate vector
+ * @brief Communication struct between 2 layers
  */
-struct InterfaceParams{
+struct LayerInterface{
+  // In/Out/Hidden
+  InterfaceType type;
+  // Dimensions of signals (tensors)
   int height;
   int width;
   int channels;
+  // For convenience store total vector size
+  int size;
+  // Forward and backward signals
+  MatrixXf forward_signal;
+  MatrixXf backward_signal;
+  // Non-linearity is needed for both layers
+  MatFunction f,f_dot;
 };
 
+
 struct FFConfig{
-  int feedforward_output;
+  int output_sz;
 };
 
 struct CNNConfig{
-  int cnn_kernel_number;
-  int cnn_kernel_length;
+  int kernel_number;
+  int kernel_dim;
 };
 
+enum LayerType{FeedForward,SoftMax,Convolutional,MSE};
 
 /**
  * @brief For configuring the base layer
@@ -43,20 +57,25 @@ struct CNNConfig{
  */
 struct LayerConfig{
   LayerType layer_type;
-  // For first layers
-  int input_size;
+  std::shared_ptr<LayerInterface> input_interface;
   // For all layers
-  int batch_size;
   MatFunction f,f_dot;
   // FF
   FFConfig ff_config;
   // CNN
   CNNConfig cnn_config;
   // For optimizer
-  OptimizerMode optimizer_mode;
-  SGDConfig sgd_config;
-  AdamConfig adam_config;
+  OptimizerConfig opt_config;
 
+};
+
+
+/**
+ * @brief Context of a pass (forward and backward)
+ */
+struct PassContext{
+  const MatrixXf input;
+  const VectorXi labels;
 };
 
 #endif

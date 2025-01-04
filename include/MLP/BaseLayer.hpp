@@ -15,13 +15,6 @@ using E::VectorXi;
 using MatFunction = std::function<MatrixXf(const MatrixXf&)>;
 
 
-/**
- * @brief Context of a pass
- */
-struct PassContext{
-  const MatrixXf input;
-  const VectorXi labels;
-};
 
 
 /**
@@ -30,41 +23,28 @@ struct PassContext{
 class BaseLayer{
 protected:
   std::string store_path; //< Where the data is stored
-  std::shared_ptr<BaseLayer> previous=nullptr;
-  std::shared_ptr<BaseLayer> next;
   // For interfacing with other layers
-  InterfaceParams input_param,output_param;
-  MatrixXf input_error; //< Signal is ready for next node
-  MatrixXf output;
-  // All layers have 1 optimizer
-  // All layers have a non-linearity
-  MatFunction f,f_dot;
+  std::shared_ptr<LayerInterface> input_interface=nullptr;
+  std::shared_ptr<LayerInterface> output_interface=nullptr;
 
 public:
   ~BaseLayer()=default;
   // Config neighboring layers
   void setStorePath(std::string path){this->store_path=path;}
-  void setPreviousLayer(std::shared_ptr<BaseLayer> prev){this->previous=prev;
-    std::cout<<prev->outputRef().rows()<<std::endl;
+  // Interface setters/getters 
+  void setInputInterface(std::shared_ptr<LayerInterface> input_interface){
+    this->input_interface=input_interface;
   }
-
-  void setNextLayer(std::shared_ptr<BaseLayer> next){this->next=next;
+  void setOutputInterface(std::shared_ptr<LayerInterface> output_interface){
+    this->output_interface=output_interface;
   }
-  void setNonLinearity(MatFunction f,MatFunction f_dot){
-    this->f=f;this->f_dot=f_dot;}
-  MatFunction getFDot(){return f_dot;}
-  // Get type
+  std::shared_ptr<LayerInterface> getInputInterface(){return input_interface;}
+  std::shared_ptr<LayerInterface> getOutputInterface(){return output_interface;}
 
-  // For interfacing with the rest base layers
-  const MatrixXf& outputRef(){return output;};
-  const MatrixXf& inputErrorRef(){return input_error;};
-  InterfaceParams& outputParamRef(){return output_param;}
-  InterfaceParams& inputParamRef(){return output_param;}
 
   // Initialization
   virtual void configure(LayerConfig config)=0;
   virtual void init()=0; 
-
 
   // Forward
   virtual void forward(const PassContext& context)=0;
@@ -72,7 +52,7 @@ public:
   virtual float loss(const PassContext& context)=0;
   virtual int prediction_success(const PassContext& context)=0;
 
-  // Backward (same idea as above)
+  // Backward
   virtual void backward(const PassContext& context)=0;;
 
   // I/O

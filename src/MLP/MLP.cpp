@@ -27,9 +27,12 @@ void MLP::addLayer(LayerConfig config){
   }
   // Chain
   int last=layers.size()-1;
-  if(last!=0){
-    layers[last]->setPreviousLayer(layers[last-1]); 
-    layers[last-1]->setNextLayer(layers[last]); 
+  if(last==0){
+    config.input_interface->type=Input;
+  }
+  else{
+    config.input_interface=layers[last-1]->getOutputInterface();
+    config.input_interface->type=Hidden;
   }
   layers[last]->configure(config);
 }
@@ -70,12 +73,9 @@ float MLP::runEpoch(){
       training_set.vectors.middleCols(batch_idx,batch_size),
       training_set.labels.segment(batch_idx,batch_size)
     };
-    //std::cout<<"Batch start"<<std::endl;
     forward(context);
-    //std::cout<<"Backward start"<<std::endl;
     total_loss+=layers[last_idx]->loss(context);
     backward(context);
-    //std::cout<<"Backward end"<<std::endl;
   }  
   return total_loss/training_sz;
 }

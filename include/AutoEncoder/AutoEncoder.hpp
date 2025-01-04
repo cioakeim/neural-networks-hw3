@@ -3,9 +3,11 @@
 
 #include "MLP/MLP.hpp"
 
+
 /**
  * @brief Autoencoder class 
   */
+/**
 class AutoEncoder:MLP{
 protected:
   // Stack structure for layers: enc_stack[0]==in / dec_stack[0]==out
@@ -30,6 +32,6 @@ public:
 
 
 };
-
+*/
 
 #endif
