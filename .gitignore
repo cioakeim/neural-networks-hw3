@@ -32,5 +32,6 @@
 *.app
 
 build/
-data/
+data/cifar-10-batches-bin
+data/PCA
 compile_flags.txt

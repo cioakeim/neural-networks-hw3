@@ -56,8 +56,10 @@ void configAutoEncoder(AutoEncoderConfig& config,
     config.f=leakyReLU;config.f_dot=leakyReLUder;
   } else if(line=="linear"){
     config.f=linear;config.f_dot=linearder;
+  } else{
+    std::cerr<<"Activation function config failed."<<std::endl;
+    exit(1);
   }
-  std::getline(file,line);
 
 }
 

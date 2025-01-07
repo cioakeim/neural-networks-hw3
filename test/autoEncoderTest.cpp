@@ -17,7 +17,7 @@ using InterfacePtr=std::shared_ptr<LayerInterface>;
 
 int main(int argc,char* argv[]){
   EventTimer et;
-  std::string config_filepath="../data/configs/test_config";
+  std::string config_filepath="../data/configs/test";
   // Config
   // Defaults
   GeneralConfig gen_config;
@@ -25,7 +25,7 @@ int main(int argc,char* argv[]){
   gen_config.run_path="../data/AutoEncoder/default_run";
   gen_config.training_size=5000;
   gen_config.test_size=1000;
-  gen_config.batch_size=1000;
+  gen_config.batch_size=50;
   gen_config.epochs=10;
   OptimizerConfig opt_config;
   opt_config=opt_config;
@@ -38,7 +38,9 @@ int main(int argc,char* argv[]){
   aenc_config.stack_types={FeedForward,FeedForward};
   aenc_config.f=linear;aenc_config.f_dot=linearder;
   if(argc!=1){
-    config_filepath=argv[1];
+    std::string arg=argv[1];
+    if(arg!="-d")
+      config_filepath=argv[1];
     configGeneral(gen_config,config_filepath+"/general.txt");
     configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
     configOptimizer(opt_config,config_filepath+"/opt.txt");
@@ -64,8 +66,8 @@ int main(int argc,char* argv[]){
   InterfacePtr input=std::make_shared<LayerInterface>();
   input->width=input->height=32;
   input->channels=3;
-  input->f=reLU;
-  input->f_dot=reLUder;
+  input->f=aenc_config.f;
+  input->f_dot=aenc_config.f_dot;
   aenc.addInterfaceStack(input);
   std::cout<<"Cool"<<std::endl;
 
