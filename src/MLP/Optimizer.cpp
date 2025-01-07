@@ -10,7 +10,6 @@ void Optimizer::setAdam(AdamConfig config){
   this->epsilon=EPSILON;
   this->beta_1=this->beta_1t=config.beta_1;
   this->beta_2=this->beta_2t=config.beta_2;
-  this->batch_size=config.batch_size;
 
   m=MatrixXf(config.mat_rows,config.mat_cols).setZero();
   u=MatrixXf(config.mat_rows,config.mat_cols).setZero();
@@ -44,7 +43,7 @@ void Optimizer::update(const MatrixXf& mat_gradients,
     // Moment calculation
     m=beta_1*m+(1-beta_1)*mat_gradients;
     u.array()=beta_2*u.array()+
-                (1-beta_2)*mat_gradients.array().square()*batch_size;
+                (1-beta_2)*mat_gradients.array().square();
 
     // Calculate weights
     mat.array()-=(rate/(1-beta_1t))*

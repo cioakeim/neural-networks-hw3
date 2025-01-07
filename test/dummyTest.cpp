@@ -42,7 +42,6 @@ int main(){
 
   LayerProperties properties;
   properties.opt_config.type=Adam;
-  properties.opt_config.adam.batch_size=batch_size;
   properties.opt_config.adam.rate=5e-4;
   properties.opt_config.adam.beta_1=0.9;
   properties.opt_config.adam.beta_2=0.999;

@@ -17,8 +17,8 @@ E::MatrixXf reLU(const E::MatrixXf& in);
 E::MatrixXf reLUder(const E::MatrixXf& reLU_output);
 
 
-E::MatrixXf leakyReLU(const E::MatrixXf& in,const float a);
-E::MatrixXf leakyReLUder(const E::MatrixXf& in,const float a);
+E::MatrixXf leakyReLU(const E::MatrixXf& in);
+E::MatrixXf leakyReLUder(const E::MatrixXf& in);
 
 // Tanh
 E::VectorXf tanh(const E::VectorXf& in);

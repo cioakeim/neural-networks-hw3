@@ -1,6 +1,10 @@
 #ifndef OPTIMIZER_HPP
 #define OPTIMIZER_HPP
 
+#ifndef EIGEN_USE_BLAS
+#define EIGEN_USE_BLAS
+#define EIGEN_USE_LAPACK
+#endif
 #include <Eigen/Dense>
 
 namespace E=Eigen;
@@ -20,7 +24,6 @@ struct AdamConfig{
   float rate;
   float beta_1;
   float beta_2;
-  int batch_size;
   int mat_rows,mat_cols;
 };
 
@@ -42,7 +45,6 @@ private:
   // For adam
   MatrixXf m;
   MatrixXf u;
-  int batch_size;
   float epsilon;
   float beta_1,beta_2;
   float beta_1t,beta_2t;

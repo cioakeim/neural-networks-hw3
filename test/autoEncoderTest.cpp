@@ -6,6 +6,7 @@
 #include "MLP/ActivationFunctions.hpp"
 #include "MLP/MLP.hpp"
 #include "AutoEncoder/AutoEncoder.hpp"
+#include "AutoEncoder/Config.hpp"
 
 #define INPUT_DIM 32
 #define INPUT_CHANNEL 3
@@ -14,96 +15,93 @@ namespace E=Eigen;
 using InterfacePtr=std::shared_ptr<LayerInterface>;
 
 
-int main(){
+int main(int argc,char* argv[]){
   EventTimer et;
-  std::string dataset_path="../data/cifar-10-batches-bin";
-  std::string log_path_base="../data/AutoEncoder/master_run2";
-  int training_size=50000;
-  int test_size=10000;
-  int batch_size=50;
-  
-  std::vector<int> epochs_list={30};
-  std::vector<float> rates={5e-4};
+  std::string config_filepath="../data/configs/test_config";
+  // Config
+  // Defaults
+  GeneralConfig gen_config;
+  gen_config.dataset_path="../data/cifar-10-batches-bin";
+  gen_config.run_path="../data/AutoEncoder/default_run";
+  gen_config.training_size=5000;
+  gen_config.test_size=1000;
+  gen_config.batch_size=1000;
+  gen_config.epochs=10;
+  OptimizerConfig opt_config;
+  opt_config=opt_config;
+  opt_config.type=Adam;
+  opt_config.adam.rate=5e-4;
+  opt_config.adam.beta_1=0.9;
+  opt_config.adam.beta_2=0.999;
+  AutoEncoderConfig aenc_config;
+  aenc_config.stack_sizes={1024,512};
+  aenc_config.stack_types={FeedForward,FeedForward};
+  aenc_config.f=linear;aenc_config.f_dot=linearder;
+  if(argc!=1){
+    config_filepath=argv[1];
+    configGeneral(gen_config,config_filepath+"/general.txt");
+    configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
+    configOptimizer(opt_config,config_filepath+"/opt.txt");
+  }
 
   et.start("Load dataset");
-  Cifar10Handler c10=Cifar10Handler(dataset_path);
-  SampleMatrix training_set=c10.getTrainingMatrix(training_size);
-  SampleMatrix test_set=c10.getTestMatrix(test_size);
-  /*
-  normalizeDataset(training_set.vectors,
-                   test_set.vectors);
-  */
+  Cifar10Handler c10=Cifar10Handler(gen_config.dataset_path);
+  SampleMatrix training_set=c10.getTrainingMatrix(gen_config.training_size);
+  SampleMatrix test_set=c10.getTestMatrix(gen_config.test_size);
   normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
   et.stop();
 
   
-  for(auto& epochs: epochs_list){
-    for(auto& rate: rates){
-      std::string log_path=
-        log_path_base+"/"+std::to_string(epochs)+"_"+
-        std::to_string(rate);
-    
-      AutoEncoder aenc=AutoEncoder(training_set,test_set,batch_size);
-      std::cout<<"Cool"<<std::endl;
+  std::string log_path=gen_config.run_path+"/logs";
 
-      LayerProperties properties;
-      properties.opt_config.type=Adam;
-      properties.opt_config.adam.batch_size=batch_size;
-      properties.opt_config.adam.rate=5e-4;
-      properties.opt_config.adam.beta_1=0.9;
-      properties.opt_config.adam.beta_2=0.999;
-      /*
-      properties.opt_config.type=SGD;
-      properties.opt_config.sgd.rate=1e-3;
-      */
-      properties.layer_type=MSE;
+  AutoEncoder aenc=AutoEncoder(training_set,test_set,gen_config.batch_size);
+  std::cout<<"Cool"<<std::endl;
 
-      InterfacePtr input=std::make_shared<LayerInterface>();
-      input->width=input->height=32;
-      input->channels=3;
-      input->f=reLU;
-      input->f_dot=reLUder;
-      aenc.addInterfaceStack(input);
-      std::cout<<"Cool"<<std::endl;
+  LayerProperties properties;
+  properties.opt_config=opt_config;
+  properties.layer_type=MSE;
 
-      std::vector<int> layer_sizes={512,124};
+  InterfacePtr input=std::make_shared<LayerInterface>();
+  input->width=input->height=32;
+  input->channels=3;
+  input->f=reLU;
+  input->f_dot=reLUder;
+  aenc.addInterfaceStack(input);
+  std::cout<<"Cool"<<std::endl;
 
-      ensure_a_path_exists(log_path);
-      for(auto layer_size: layer_sizes){
-        // Log the run with these layers
-        std::ofstream log(log_path+"/run_"+std::to_string(layer_size)+".csv");
-        if(!log.is_open()){
-          std::cerr<<"CAN'T OPEN LOG: "<<log_path+"/run_"+std::to_string(layer_size)+".csv"<<std::endl;
-          exit(1);
-        }
-        log<<"Epoch,J_train,J_test"<<"\n";
-        InterfacePtr interface=std::make_shared<LayerInterface>(*input);
-        interface->height=layer_size;
-        interface->width=interface->channels=1;
-        aenc.addInterfaceStack(interface);
-        std::cout<<"Cool"<<std::endl;
-        aenc.addLayerStack(properties);
-        std::cout<<"Cool"<<std::endl;
-        float J_train,J_test;
-        float accuracy;
-        et.start("Run epochs");
-        std::cout<<"Epochs: "<<std::endl;
-        for(int i=0;i<epochs;i++){
-          J_train=aenc.runEpoch();
-          std::cout<<"Loss: "<<J_train<<std::endl;
-          aenc.testModel(test_set, J_test, accuracy);
-          std::cout<<"Test loss: "<<J_test<<std::endl;
-          log<<i<<","<<J_train<<","<<J_test<<"\n";
-        }
-        log.close();
-        et.stop();
-        properties.layer_type=FeedForward;
-        //properties.opt_config.adam.rate=5e-5;
-      } 
 
+  ensure_a_path_exists(log_path);
+  for(unsigned int i=0;i<aenc_config.stack_sizes.size();i++){
+    const int layer_size=aenc_config.stack_sizes[i];
+    const LayerType layer_type=aenc_config.stack_types[i];
+    std::ofstream log(log_path+"/run_"+std::to_string(layer_size)+".csv");
+    if(!log.is_open()){
+      std::cerr<<"CAN'T OPEN LOG: "<<log_path+"/run_"+std::to_string(layer_size)+".csv"<<std::endl;
+      exit(1);
     }
+    InterfacePtr interface=std::make_shared<LayerInterface>(*input);
+    interface->height=layer_size;
+    interface->width=interface->channels=1;
+    aenc.addInterfaceStack(interface);
+    std::cout<<"Cool"<<std::endl;
+    aenc.addLayerStack(properties);
+    std::cout<<"Cool"<<std::endl;
+    float J_train,J_test;
+    float accuracy;
+    et.start("Run epochs");
+    std::cout<<"Epochs: "<<std::endl;
+    for(int i=0;i<gen_config.epochs;i++){
+      J_train=aenc.runEpoch();
+      std::cout<<"Loss: "<<J_train<<std::endl;
+      aenc.testModel(test_set, J_test, accuracy);
+      std::cout<<"Test loss: "<<J_test<<std::endl;
+      log<<i<<","<<J_train<<","<<J_test<<"\n";
+    }
+    log.close();
+    properties.layer_type=layer_type;
+    et.stop();
   }
 
   et.displayIntervals();
-
+  et.writeToFile(log_path+"/time_info.txt");
 }

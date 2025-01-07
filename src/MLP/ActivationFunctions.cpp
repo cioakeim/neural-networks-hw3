@@ -2,6 +2,8 @@
 #include <cmath>
 #include <random>
 
+#define LRELU_A 0.01
+
 E::MatrixXf reLU(const E::MatrixXf& in){
   return in.cwiseMax(0.0);
 }
@@ -10,11 +12,13 @@ E::MatrixXf reLUder(const E::MatrixXf& reLU_output){
   return (reLU_output.array()>0).cast<float>();
 }
 
-E::MatrixXf leakyReLU(const E::MatrixXf& in,const float a){
+E::MatrixXf leakyReLU(const E::MatrixXf& in){
+  const float a=LRELU_A;
   return in.cwiseMax(a*in);
 }
 
-E::MatrixXf leakyReLUder(const E::MatrixXf& output,const float a){
+E::MatrixXf leakyReLUder(const E::MatrixXf& output){
+  const float a=LRELU_A;
   const int rows=output.rows();
   const int cols=output.cols();
 
