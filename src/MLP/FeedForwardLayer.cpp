@@ -11,6 +11,7 @@ static int getInterfaceVectorSize(std::shared_ptr<LayerInterface> interface){
 
 // Initialization
 void FeedForwardLayer::configure(LayerConfig config){
+  std::cout<<"Feedforward config"<<std::endl;
   input_interface=config.input_interface;
   output_interface=config.output_interface;
 
@@ -33,7 +34,7 @@ void FeedForwardLayer::configure(LayerConfig config){
 void FeedForwardLayer::init(){
   const int rows=weights.rows();
   const int cols=weights.cols();
-  const float stddev= std::sqrt(2.0f/rows);
+  const float stddev= std::sqrt(2.0f/cols);
   // Init rng 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -49,10 +50,13 @@ void FeedForwardLayer::init(){
 
 
 void FeedForwardLayer::forward(const PassContext& context){
+  //std::cout<<"Forward, converting to: "<<weights.rows()<<std::endl;
   const MatrixXf& input=(input_interface->type==Input)?
     context.input:input_interface->forward_signal;
+  //std::cout<<"Input recognized, dim: "<<input.rows()<<std::endl;
   MatFunction f=output_interface->f;
   output_interface->forward_signal=f((weights*input).colwise()+biases.col(0));
+  //std::cout<<"Done"<<std::endl;
 }
 
 
@@ -123,4 +127,10 @@ void FeedForwardLayer::load(){
   ensure_a_path_exists(store_path);
   weights=loadMatrixFromFile(store_path+"/weights.csv");
   biases=loadMatrixFromFile(store_path+"/biases.csv");
+}
+
+
+void FeedForwardLayer::printStateInfo(){
+  //std::cout<<"Weights mean square: "<<weights.array().pow(2).mean()<<std::endl;
+  //std::cout<<"Biases mean square: "<<biases.array().pow(2).mean()<<std::endl;
 }

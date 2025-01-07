@@ -9,7 +9,7 @@ using LayerPtr=std::shared_ptr<BaseLayer>;
 /**
  * @brief Autoencoder class 
   */
-class AutoEncoder:MLP{
+class AutoEncoder:public MLP{
 protected:
   // Stack structure for layers: enc_stack[0]==in / dec_stack[0]==out
   // Both vectors point to the same objects layers[] sees.
@@ -18,7 +18,7 @@ protected:
   // These don't contain the encoded interface
   std::vector<InterfacePtr> enc_interfaces;
   std::vector<InterfacePtr> dec_interfaces;
-  InterfacePtr encoded_product; //< Pointer to encoded output
+  InterfacePtr encoded_product=nullptr; //< Pointer to encoded output
 
   // Move the 2 stacks to the layers
   void convertToMLP();

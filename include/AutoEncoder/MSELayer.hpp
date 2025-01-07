@@ -7,6 +7,7 @@
  * @brief Extension of Feedforward with mse loss 
 */
 class MSELayer : public FeedForwardLayer{
+  void configure(LayerConfig config) override;
 
   void forward(const PassContext& context) override;
 

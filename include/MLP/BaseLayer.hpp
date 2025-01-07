@@ -41,7 +41,7 @@ public:
     this->output_interface=output_interface;
   }
   // Locking 
-  void lock(){lockParams=true;}
+  void lock(){lockParams=false;}
   void unlock(){lockParams=false;}
 
   std::shared_ptr<LayerInterface> getInputInterface(){return input_interface;}
@@ -64,6 +64,9 @@ public:
   // I/O
   virtual void store()=0;
   virtual void load()=0;
+
+  // For debugging
+  virtual void printStateInfo()=0;
 };
 
 #endif

@@ -1,4 +1,11 @@
 #include "AutoEncoder/MSELayer.hpp"
+#include "MLP/ActivationFunctions.hpp"
+
+void MSELayer::configure(LayerConfig config){
+  FeedForwardLayer::configure(config);
+  output_interface->f=linear;
+  output_interface->f_dot=linearder;
+}
 
 
 void MSELayer::forward(const PassContext& context){
@@ -8,21 +15,21 @@ void MSELayer::forward(const PassContext& context){
 
 float MSELayer::loss(const PassContext& context){
   const MatrixXf& output=output_interface->forward_signal;
-  return (context.input.array()-output.array()).array().pow(2).mean();
+  const MatrixXf& error=(context.input.array()-output.array()).array().pow(2);
+  return error.mean()*error.cols();
 }
 
 
 int MSELayer::prediction_success(const PassContext& context){
-  std::cerr<<"MSE Layer can't predict anything.. Aborting.."<<std::endl;
-  exit(1);
   return -1;
 }
 
 
 void MSELayer::backward(const PassContext& context){
+  const float lambda=2;
   // Derivative in MSE is just y_bar-y 
   const MatrixXf& output=output_interface->forward_signal;
-  MatrixXf error=output-context.input;
+  MatrixXf error=(lambda/output.rows())*(output-context.input);
   const E::MatrixXf& in=(input_interface->type==Input)?
     context.input:input_interface->forward_signal;
   // Pass backward if needed

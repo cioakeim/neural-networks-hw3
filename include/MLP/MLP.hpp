@@ -57,7 +57,8 @@ public:
 
 
   // Test the epoch result (return the loss function and accuracy)
-  void testModel(float& J_test,float& accuracy);
+  void testModel(const SampleMatrix& set,
+                 float& J_test,float& accuracy);
 
   // Store to place
   void store();

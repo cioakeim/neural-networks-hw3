@@ -1,36 +1,58 @@
 #include "AutoEncoder/AutoEncoder.hpp"
 #include "MLP/FeedForwardLayer.hpp"
 #include "AutoEncoder/MSELayer.hpp"
+#include "MLP/ActivationFunctions.hpp"
 #include <iostream>
 
 
 void AutoEncoder::convertToMLP(){
   layers.clear();
-  for(auto it= enc_stack.begin();it!=enc_stack.end();it++){
-    layers.push_back(*it);
+  int sz=enc_stack.size();
+  for(int i=0;i<sz;i++){
+    layers.push_back(enc_stack[i]);
   }
-  for(auto it= dec_stack.rbegin();it!=enc_stack.rend();it++){
-    layers.push_back(*it);
+  for(int i=sz-1;i>=0;i--){
+    layers.push_back(dec_stack[i]);
   }
+  // Configure correct interface types
+  for(auto& interface: enc_interfaces){
+    interface->type=Hidden;
+  }
+  for(auto& interface: dec_interfaces){
+    interface->type=Hidden;
+  }
+  encoded_product->type=Hidden;
+  // Exceptions
+  enc_interfaces[0]->type=Input;
+  dec_interfaces[0]->type=Output;
 }
 
 
 void AutoEncoder::addInterfaceStack(InterfacePtr new_encoded_interface){
   // If first entry just insert and return
-  if(enc_interfaces.size()==0){
+  if(!encoded_product){
     encoded_product=new_encoded_interface;
+    std::cout<<"FIRST LAYER"<<std::endl;
     return;
   }
   // Create an exact copy of current encoded interface
-  enc_interfaces.push_back(encoded_product);
+  enc_interfaces.push_back(std::make_shared<LayerInterface>(*encoded_product));
   dec_interfaces.push_back(std::make_shared<LayerInterface>(*encoded_product));
+  /*
+  dec_interfaces.back()->f=linear;
+  dec_interfaces.back()->f_dot=linearder;
+  */
 
   // Link the last layers to the new interfaces
-  enc_stack.back()->setOutputInterface(enc_interfaces.back());
-  dec_stack.back()->setOutputInterface(dec_interfaces.back());
+  if(enc_interfaces.size()>1){
+    std::cout<<"Entering here"<<std::endl;
+    enc_stack.back()->setOutputInterface(enc_interfaces.back());
+    dec_stack.back()->setInputInterface(dec_interfaces.back());
+  }
 
   // Update current encoding product 
   encoded_product=new_encoded_interface;
+  std::cout<<"DONE"<<std::endl;
 }
 
 
@@ -56,19 +78,23 @@ void AutoEncoder::addLayerStack(LayerProperties properties){
   }
   // Configure both layers
   int if_sz=enc_interfaces.size();
+  std::cout<<"Interface size: "<<if_sz<<std::endl;
   LayerConfig config;
   config.properties=properties;
   // For encoding stack
-  config.input_interface=enc_interfaces[if_sz-1];
+  config.input_interface=enc_interfaces.back();
   config.output_interface=encoded_product;
+  std::cout<<"Here good"<<std::endl;
   enc_stack.back()->configure(config);
   // For decoding stack
   config.input_interface=encoded_product;
-  config.input_interface=dec_interfaces[if_sz-1];
+  config.output_interface=dec_interfaces.back();
+  std::cout<<"Here good"<<std::endl;
   dec_stack.back()->configure(config);
 
   // Update MLP 
   convertToMLP();
+  std::cout<<"Converted"<<std::endl;
 }
 
 

@@ -15,7 +15,8 @@ using InterfacePtr=std::shared_ptr<LayerInterface>;
 int main(){
   EventTimer et;
   std::string dataset_path="../data/cifar-10-batches-bin";
-  int training_size=5000;
+  std::string log_path="../data/AutoEncoder/mlp_run";
+  int training_size=50000;
   int test_size=1000;
   int batch_size=50;
 
@@ -42,12 +43,12 @@ int main(){
   LayerProperties properties;
   properties.opt_config.type=Adam;
   properties.opt_config.adam.batch_size=batch_size;
-  properties.opt_config.adam.rate=1e-3;
+  properties.opt_config.adam.rate=5e-4;
   properties.opt_config.adam.beta_1=0.9;
   properties.opt_config.adam.beta_2=0.999;
   properties.layer_type=FeedForward;
 
-  std::vector<int> layer_sizes={1024,512,124};
+  std::vector<int> layer_sizes={512,124,512};
   /*
   config.opt_config.type=SGD;
   config.opt_config.sgd.rate=1e-3;
@@ -72,22 +73,39 @@ int main(){
   }
   std::cout<<"Cool"<<std::endl;
   InterfacePtr interface=std::make_shared<LayerInterface>();
+  /*
   interface->width=interface->channels=1;
   interface->height=10;
   interface->f=reLU;
   interface->f_dot=reLUder;
   properties.layer_type=SoftMax;
+  */
+  interface->width=interface->height=32;
+  interface->channels=3;
+  interface->f=linear;
+  interface->f_dot=linearder;
+  properties.layer_type=MSE;
+
+
   mlp.addInterface(interface);
   mlp.addLayer(properties);
 
-  float loss;
+  ensure_a_path_exists(log_path);
+  std::ofstream log(log_path+"/run.csv");
+  log<<"Epoch,J_train,J_test"<<"\n";
 
+  float J_train,J_test,accuracy;
   et.start("Run epochs");
   std::cout<<"Epochs: "<<std::endl;
-  for(int i=0;i<10;i++){
-    loss=mlp.runEpoch();
-    std::cout<<"Loss: "<<loss<<std::endl;
+  for(int i=0;i<50;i++){
+    J_train=mlp.runEpoch();
+    mlp.testModel(test_set, J_test, accuracy);
+    std::cout<<"Loss: "<<J_train<<std::endl;
+    std::cout<<"Test: "<<J_test<<std::endl;
+    log<<i<<","<<J_train<<","<<J_test<<"\n";
+
   }
+  log.close();
   et.stop();
 
   et.displayIntervals();

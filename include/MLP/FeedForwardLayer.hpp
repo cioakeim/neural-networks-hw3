@@ -47,6 +47,7 @@ public:
   void store() override;
   void load() override;
 
+  void printStateInfo() override;
 
 };
 

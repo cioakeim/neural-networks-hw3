@@ -2,30 +2,26 @@
 #include <cmath>
 #include <random>
 
-E::VectorXf reLU(const E::VectorXf& in){
-  return in.cwiseMax(0.0);
-}
-
-E::VectorXf reLUder(const E::VectorXf& reLU_output){
-  return (reLU_output.array()>0).cast<float>();
-}
-
-E::MatrixXf reLUdropout(const E::MatrixXf& in);
-E::MatrixXf reLUder(const E::MatrixXf& reLU_output);
-
-float reLU_el(const float in){
-  return (in>0) ? in : 0.0f;
-}
-float reLUder_el(const float in){
-  return (in>0) ? 1.0f : 0.0f;
-}
-
 E::MatrixXf reLU(const E::MatrixXf& in){
   return in.cwiseMax(0.0);
 }
 
 E::MatrixXf reLUder(const E::MatrixXf& reLU_output){
   return (reLU_output.array()>0).cast<float>();
+}
+
+E::MatrixXf leakyReLU(const E::MatrixXf& in,const float a){
+  return in.cwiseMax(a*in);
+}
+
+E::MatrixXf leakyReLUder(const E::MatrixXf& output,const float a){
+  const int rows=output.rows();
+  const int cols=output.cols();
+
+  return (output.array()>0).select(
+    E::MatrixXf::Constant(rows,cols,1),
+    E::MatrixXf::Constant(rows,cols,a)
+  );
 }
 
 

@@ -1,6 +1,7 @@
 #include "MLP/MLP.hpp"
 #include "MLP/FeedForwardLayer.hpp"
 #include "MLP/SoftMaxLayer.hpp"
+#include "AutoEncoder/MSELayer.hpp"
 #include "CommonLib/basicFuncs.hpp"
 #include <fstream> 
 #include <filesystem>
@@ -25,6 +26,9 @@ void MLP::addLayer(LayerProperties properties){
     break;
   case SoftMax:
     layers.push_back(std::make_shared<SoftMaxLayer>());
+    break;
+  case MSE:
+    layers.push_back(std::make_shared<MSELayer>());
     break;
   default:
     std::cerr<<"Don't know what type that is.."<<std::endl;
@@ -88,24 +92,32 @@ float MLP::runEpoch(){
       training_set.vectors.middleCols(batch_idx,batch_size),
       training_set.labels.segment(batch_idx,batch_size)
     };
+    //std::cout<<"Forward"<<std::endl;
     forward(context);
+    //std::cout<<"Loss"<<std::endl;
     total_loss+=layers[last_idx]->loss(context);
+    //std::cout<<"Bac"<<std::endl;
     backward(context);
   }  
+  for(auto& layer: layers){
+    layer->printStateInfo();
+  }
+  
   return total_loss/training_sz;
 }
 
 
 // Test the epoch result (return the loss function and accuracy)
-void MLP::testModel(float& J_test,float& accuracy){
+void MLP::testModel(const SampleMatrix& set,
+                    float& J_test,float& accuracy){
   J_test=0;
   int success_count=0;
-  int test_sz=training_set.vectors.cols();
+  int test_sz=set.vectors.cols();
   int last_idx=layers.size()-1;
   for(int batch_idx=0;batch_idx<test_sz;batch_idx+=batch_size){
     const PassContext context{
-      test_set.vectors.middleCols(batch_idx,batch_size),
-      test_set.labels.segment(batch_idx,batch_size)
+      set.vectors.middleCols(batch_idx,batch_size),
+      set.labels.segment(batch_idx,batch_size)
     };
     forward(context);
     J_test+=layers[last_idx]->loss(context);
