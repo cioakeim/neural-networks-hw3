@@ -1,5 +1,5 @@
 ../data/cifar-10-batches-bin
-../data/AutoEncoder/linear/2Layer
+../data/AutoEncoder/rate/run4
 50000
 10000
 50

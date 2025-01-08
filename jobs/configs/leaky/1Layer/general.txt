@@ -1,5 +1,5 @@
 ../data/cifar-10-batches-bin
-../data/AutoEncoder/linear/1Layer
+../data/AutoEncoder/leaky/1Layer
 50000
 10000
 50
