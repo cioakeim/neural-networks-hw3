@@ -39,8 +39,10 @@ int main(int argc,char* argv[]){
   aenc_config.f=linear;aenc_config.f_dot=linearder;
   if(argc!=1){
     std::string arg=argv[1];
-    if(arg!="-d")
+    if(arg!="-d"){
+      std::cout<<"Config found!"<<std::endl;
       config_filepath=argv[1];
+    }
     configGeneral(gen_config,config_filepath+"/general.txt");
     configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
     configOptimizer(opt_config,config_filepath+"/opt.txt");

@@ -29,11 +29,13 @@ void configAutoEncoder(AutoEncoderConfig& config,
 
   std::getline(file,line);
   vecStream=std::istringstream(line);
+  config.stack_sizes.clear();
   while (std::getline(vecStream, item, ',')) {
       config.stack_sizes.push_back(std::stoi(item));
   }
   std::getline(file,line);
   vecStream=std::istringstream(line);
+  config.stack_types.clear();
   while (std::getline(vecStream, item, ',')) {
     switch(item[0]){
       case 'M':
