@@ -24,12 +24,17 @@ int MSELayer::prediction_success(const PassContext& context){
   return -1;
 }
 
+MatrixXf MSELayer::initialError(const PassContext& context,
+                                const MatrixXf& output){
+  const float lambda=2;
+  return (lambda/output.rows())*(output-context.input);
+}
+
 
 void MSELayer::backward(const PassContext& context){
-  const float lambda=2;
   // Derivative in MSE is just y_bar-y 
   const MatrixXf& output=output_interface->forward_signal;
-  MatrixXf error=(lambda/output.rows())*(output-context.input);
+  MatrixXf error=initialError(context,output);
   const E::MatrixXf& in=(input_interface->type==Input)?
     context.input:input_interface->forward_signal;
   // Pass backward if needed

@@ -16,6 +16,9 @@ class MSELayer : public FeedForwardLayer{
 
   void backward(const PassContext& context) override;
 
+  MatrixXf initialError(const PassContext& context,
+                        const MatrixXf& output);
+
 };
 
 
