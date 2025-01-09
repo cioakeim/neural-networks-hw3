@@ -51,7 +51,7 @@ public:
   void setBatchSize(int batch_size){this->batch_size=batch_size;}
 
   void forward(const PassContext& context);
-  void backward(const PassContext& context);
+  virtual void backward(const PassContext& context);
 
   float runEpoch();
 

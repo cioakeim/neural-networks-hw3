@@ -52,6 +52,8 @@ private:
 public:
   Optimizer(){};
 
+  void setRate(const float rate){this->rate=rate;}
+
   void setAdam(AdamConfig config);
                
   void setSGD(SGDConfig config);

@@ -92,11 +92,8 @@ float MLP::runEpoch(){
       training_set.vectors.middleCols(batch_idx,batch_size),
       training_set.labels.segment(batch_idx,batch_size)
     };
-    //std::cout<<"Forward"<<std::endl;
     forward(context);
-    //std::cout<<"Loss"<<std::endl;
     total_loss+=layers[last_idx]->loss(context);
-    //std::cout<<"Bac"<<std::endl;
     backward(context);
   }  
   for(auto& layer: layers){

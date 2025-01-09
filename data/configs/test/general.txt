@@ -1,0 +1,6 @@
+../data/cifar-10-batches-bin
+../data/AutoEncoder/rate/run1
+500
+100
+50
+5

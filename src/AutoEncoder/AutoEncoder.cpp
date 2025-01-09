@@ -58,7 +58,7 @@ void AutoEncoder::addInterfaceStack(InterfacePtr new_encoded_interface){
 
 void AutoEncoder::addLayerStack(LayerProperties properties){
   // Adding a layer means locking the rest 
-  if(enc_stack.size()>0){
+  if(enc_stack.size()>0 && weights_lockable){
     enc_stack.back()->lock();
     dec_stack.back()->lock();
   }
@@ -77,8 +77,6 @@ void AutoEncoder::addLayerStack(LayerProperties properties){
     break;
   }
   // Configure both layers
-  int if_sz=enc_interfaces.size();
-  std::cout<<"Interface size: "<<if_sz<<std::endl;
   LayerConfig config;
   config.properties=properties;
   // For encoding stack
@@ -108,3 +106,42 @@ MatrixXf AutoEncoder::encode(MatrixXf& set){
   }
   return enc_stack[enc_size-1]->getOutputInterface()->forward_signal;
 }
+
+
+void AutoEncoder::backward(const PassContext& context){
+  if(!weights_lockable){
+    MLP::backward(context);
+  }
+  else{
+    for(auto& layer: dec_stack){
+      layer->backward(context);
+    }
+    enc_stack.back()->backward(context);
+  }
+}
+
+
+void AutoEncoder::unlockAll(){
+  for(auto& layer: layers){
+    layer->unlock();
+  }
+  weights_lockable=false;
+}
+
+
+void AutoEncoder::setLearningRate(const float rate){
+  for(auto& layer: layers){
+    layer->setLearningRate(rate);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

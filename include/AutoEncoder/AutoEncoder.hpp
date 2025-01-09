@@ -19,6 +19,8 @@ protected:
   std::vector<InterfacePtr> enc_interfaces;
   std::vector<InterfacePtr> dec_interfaces;
   InterfacePtr encoded_product=nullptr; //< Pointer to encoded output
+  
+  bool weights_lockable=false; //< If true, training is done only layer by layers
 
   // Move the 2 stacks to the layers
   void convertToMLP();
@@ -28,9 +30,18 @@ public:
               SampleMatrix& test_set,
               int batch_size):MLP(training_set,test_set,batch_size){};
 
+  void setWeightsLockable(bool weights_lockable){this->weights_lockable=weights_lockable;}
+
   // Add a new layer stack and lock the previous ones
   void addInterfaceStack(InterfacePtr new_encoded_interface);
   void addLayerStack(LayerProperties properties);
+
+  // Backward is redisigned for locking weights cases
+  void backward(const PassContext& context) override;
+
+  // For unlocking and fine tuning
+  void unlockAll();
+  void setLearningRate(const float rate);
 
   // For only encoding matrices
   MatrixXf encode(MatrixXf& set);

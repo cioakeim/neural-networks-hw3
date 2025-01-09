@@ -7,7 +7,7 @@
 
 int main(){
   std::string dataset_path="../data/cifar-10-batches-bin";
-  std::string store_path="../data/PCA/";
+  std::string store_path="../data/PCA2/";
   int training_size=50000;
   int test_size=10000;
   float info_percentage=0.99;
@@ -36,7 +36,7 @@ int main(){
   std::cout<<"Done"<<std::endl;
 
   int total_component_sz=training_set.vectors.rows();
-  for(int comp_num=1;comp_num<total_component_sz;comp_num+=100){
+  for(int comp_num=124;comp_num<=total_component_sz;comp_num+=124){
     std::cout<<"NUM: "<<comp_num<<std::endl;
     int bounded_comp=std::min(comp_num,total_component_sz);
     pca.createPrincipalComponents(bounded_comp);

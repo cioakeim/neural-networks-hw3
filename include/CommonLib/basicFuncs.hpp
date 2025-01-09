@@ -38,6 +38,8 @@ std::vector<int> stringToVector(std::string str);
 
 void NaNcheck(const E::MatrixXf& mat,std::string error_label);
 
+int count_directories_by_prefix(std::string file_path, std::string keyword);
+
 
 
 

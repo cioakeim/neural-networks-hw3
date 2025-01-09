@@ -26,6 +26,7 @@ int MSELayer::prediction_success(const PassContext& context){
 
 
 void MSELayer::backward(const PassContext& context){
+
   const float lambda=2;
   // Derivative in MSE is just y_bar-y 
   const MatrixXf& output=output_interface->forward_signal;

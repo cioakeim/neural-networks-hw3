@@ -23,10 +23,10 @@ int main(int argc,char* argv[]){
   GeneralConfig gen_config;
   gen_config.dataset_path="../data/cifar-10-batches-bin";
   gen_config.run_path="../data/AutoEncoder/default_run";
-  gen_config.training_size=5000;
+  gen_config.training_size=500;
   gen_config.test_size=1000;
   gen_config.batch_size=50;
-  gen_config.epochs=10;
+  gen_config.epochs=3;
   OptimizerConfig opt_config;
   opt_config=opt_config;
   opt_config.type=Adam;
@@ -34,8 +34,9 @@ int main(int argc,char* argv[]){
   opt_config.adam.beta_1=0.9;
   opt_config.adam.beta_2=0.999;
   AutoEncoderConfig aenc_config;
-  aenc_config.stack_sizes={1024,512};
+  aenc_config.stack_sizes={1024,512,124};
   aenc_config.stack_types={FeedForward,FeedForward};
+  aenc_config.lock_weights=true;
   aenc_config.f=linear;aenc_config.f_dot=linearder;
   if(argc!=1){
     std::string arg=argv[1];
@@ -55,10 +56,10 @@ int main(int argc,char* argv[]){
   normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
   et.stop();
 
-  
-  std::string log_path=gen_config.run_path+"/logs";
 
   AutoEncoder aenc=AutoEncoder(training_set,test_set,gen_config.batch_size);
+  aenc.setStorePath(config_filepath);
+  aenc.setWeightsLockable(aenc_config.lock_weights);
   std::cout<<"Cool"<<std::endl;
 
   LayerProperties properties;
@@ -74,6 +75,8 @@ int main(int argc,char* argv[]){
   std::cout<<"Cool"<<std::endl;
 
 
+  // Layer-wise training
+  std::string log_path=config_filepath+"/logs";
   ensure_a_path_exists(log_path);
   for(unsigned int i=0;i<aenc_config.stack_sizes.size();i++){
     const int layer_size=aenc_config.stack_sizes[i];
@@ -105,6 +108,34 @@ int main(int argc,char* argv[]){
     properties.layer_type=layer_type;
     et.stop();
   }
+  // If weights were locked, time to fine-tune
+  if(aenc_config.lock_weights){
+    std::ofstream log(log_path+"/run_fine_tune.csv");
+    if(!log.is_open()){
+      std::cerr<<"CAN'T OPEN LOG: "<<log_path+"/run_fine_tune.csv"<<std::endl;
+      exit(1);
+    }
+    float rate=(opt_config.type==Adam)?
+      (opt_config.adam.rate):(opt_config.sgd.rate);
+    aenc.setLearningRate(rate/10);
+    aenc.unlockAll();
+    float J_train,J_test;
+    float accuracy;
+    et.start("Run epochs");
+    std::cout<<"Epochs: "<<std::endl;
+    const int fine_tune_epochs=gen_config.epochs*aenc_config.stack_sizes.size();
+    for(int i=0;i<fine_tune_epochs;i++){
+      J_train=aenc.runEpoch();
+      std::cout<<"Loss: "<<J_train<<std::endl;
+      aenc.testModel(test_set, J_test, accuracy);
+      std::cout<<"Test loss: "<<J_test<<std::endl;
+      log<<i<<","<<J_train<<","<<J_test<<"\n";
+    }
+    log.close();
+    et.stop();
+  }
+  
+
 
   et.displayIntervals();
   et.writeToFile(log_path+"/time_info.txt");

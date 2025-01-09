@@ -41,8 +41,10 @@ public:
     this->output_interface=output_interface;
   }
   // Locking 
-  void lock(){lockParams=false;}
-  void unlock(){lockParams=false;}
+  void lock(){
+    std::cout<<"PRINCE IS LOCKED"<<std::endl;
+    this->lockParams=true;}
+  void unlock(){this->lockParams=false;}
 
   std::shared_ptr<LayerInterface> getInputInterface(){return input_interface;}
   std::shared_ptr<LayerInterface> getOutputInterface(){return output_interface;}
@@ -59,7 +61,10 @@ public:
   virtual int prediction_success(const PassContext& context)=0;
 
   // Backward
-  virtual void backward(const PassContext& context)=0;;
+  virtual void backward(const PassContext& context)=0;
+
+  // Fine-tuning
+  virtual void setLearningRate(const float rate) =0;
 
   // I/O
   virtual void store()=0;

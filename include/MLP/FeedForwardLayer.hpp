@@ -39,6 +39,10 @@ public:
   // For Feedforward loss function is MSE
   void backward(const PassContext& context) override;
 
+  void setLearningRate(const float rate) override{
+    weights_opt.setRate(rate);biases_opt.setRate(rate);
+  };
+
   // For updating
   void updateWeights(const MatrixXf& input,
                      const MatrixXf& error);
