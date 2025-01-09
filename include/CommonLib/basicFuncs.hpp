@@ -25,12 +25,24 @@ E::VectorXf loadVectorFromFile(const std::string file_path);
 void storeVectorToFile(const std::string file_path,
                        const E::VectorXf vector);
 
+
+struct NormalizationParams{
+  float mean;
+  float sigma;
+};
+
 void normalizeDataset(E::MatrixXf& training_set,
-                      E::MatrixXf& test_set);
+                      E::MatrixXf& test_set,
+                      NormalizationParams& params);
+
 
 void normalizeImageDataset(E::MatrixXf& training_set,
                            E::MatrixXf& test_set,
-                           int channel_number);
+                           int channel_number,
+                           std::vector<NormalizationParams>& params);
+
+void denormalizeSamples(E::MatrixXf& samples,
+                        std::vector<NormalizationParams> params);
 
 void shuffleDatasetInPlace(SampleMatrix& set);
 

@@ -3,7 +3,6 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-//#include <opencv4/opencv2/opencv.hpp>
 
 // Constructor
 Cifar10Handler::Cifar10Handler(std::string dataset_folder_path)
@@ -117,9 +116,15 @@ std::string Cifar10Handler::getClassName(int class_id){
   return "";
 }
 
-/**
+#ifdef WITH_OPENCV
 
-void Cifar10Handler::printSample(SamplePoint& sample){
+#include <opencv4/opencv2/opencv.hpp>
+
+void Cifar10Handler::printSample(const E::MatrixXf& sample,
+                                 std::vector<NormalizationParams> params){
+  static int image_cnt=0;
+  E::MatrixXf denorm_sample=sample;
+  denormalizeSamples(denorm_sample,params);
   const int height=32,width=32;
   // H X W uint8_t 3 channel matrix
   cv::Mat image(height,width,CV_8UC3);
@@ -129,20 +134,34 @@ void Cifar10Handler::printSample(SamplePoint& sample){
       // Index at flat array 
       int idx=i*height+j;
       // Get all 3 channels (BGR format)
-      image.at<cv::Vec3b>(i,j)[0]=static_cast<uint8_t>(255*sample.vector[idx+2*height*width]); // B
-      image.at<cv::Vec3b>(i,j)[1]=static_cast<uint8_t>(255*sample.vector[idx+height*width]); // G
-      image.at<cv::Vec3b>(i,j)[2]=static_cast<uint8_t>(255*sample.vector[idx]); // R
+      image.at<cv::Vec3b>(i,j)[0]=static_cast<uint8_t>(255*denorm_sample(idx+2*height*width,0)); // B
+      image.at<cv::Vec3b>(i,j)[1]=static_cast<uint8_t>(255*denorm_sample(idx+height*width,0)); // G
+      image.at<cv::Vec3b>(i,j)[2]=static_cast<uint8_t>(255*denorm_sample(idx,0)); // R
     }
   }
   // Resize image
   cv::Mat largerImage;
   cv::resize(image, largerImage, cv::Size(), 10.0, 10.0);
 
-  cv::imshow("Sample",largerImage);
-  cv::waitKey(0);
-
+  cv::imshow("Sample"+std::to_string(image_cnt++),largerImage);
 }
-*/
+
+
+void Cifar10Handler::printMultipleSamples(std::vector<E::MatrixXf> samples,
+                                          std::vector<NormalizationParams> params){
+  for(auto& sample: samples){
+    printSample(sample,params);
+  }
+  std::cout<<"Here"<<std::endl;
+  while (true) {
+    char key = (char)cv::waitKey(1); // Check for key press with a delay of 1 ms
+    if (key == 'q') {
+      break;
+    }
+  }
+  cv::destroyAllWindows();
+}
+#endif
 
 
 SampleMatrix Cifar10Handler::getTrainingMatrix(int sample_count){

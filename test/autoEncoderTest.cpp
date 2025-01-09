@@ -53,7 +53,8 @@ int main(int argc,char* argv[]){
   Cifar10Handler c10=Cifar10Handler(gen_config.dataset_path);
   SampleMatrix training_set=c10.getTrainingMatrix(gen_config.training_size);
   SampleMatrix test_set=c10.getTestMatrix(gen_config.test_size);
-  normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
+  std::vector<NormalizationParams> params;
+  normalizeImageDataset(training_set.vectors, test_set.vectors, 3,params);
   et.stop();
 
 

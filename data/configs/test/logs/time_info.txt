@@ -1,11 +1,4 @@
-<<<<<<< HEAD
-Load dataset (s), 0.015318
-Run epochs (s), 2.47381
-Run epochs (s), 1.17688
-Run epochs (s), 2.49469
-=======
-Load dataset (s), 0.0152283
-Run epochs (s), 2.49313
-Run epochs (s), 1.14535
-Run epochs (s), 5.06331
->>>>>>> 0145f8c (Added load/store support)
+Load dataset (s), 0.0179281
+Run epochs (s), 2.75367
+Run epochs (s), 1.5766
+Run epochs (s), 5.72558

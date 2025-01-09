@@ -120,7 +120,8 @@ void shuffleDatasetInPlace(SampleMatrix& set){
 
 
 void normalizeDataset(E::MatrixXf& training_set,
-                      E::MatrixXf& test_set){
+                      E::MatrixXf& test_set,
+                      NormalizationParams& params){
   float train_sz=training_set.cols();
   float test_sz=test_set.cols();
   float mean=(train_sz*training_set.mean()+test_sz*test_set.mean())
@@ -133,24 +134,39 @@ void normalizeDataset(E::MatrixXf& training_set,
               (train_sz+test_sz);
   training_set.array()/=sigma;
   test_set.array()/=sigma;
+  params.mean=mean;
+  params.sigma=sigma;
 }
 
 
 void normalizeImageDataset(E::MatrixXf& training_set,
                            E::MatrixXf& test_set,
-                           int channel_number){
+                           int channel_number,
+                           std::vector<NormalizationParams>& params){
   int pixels=training_set.rows()/channel_number;
   int training_sz=training_set.cols();
   int test_sz=test_set.cols();
+  params.clear();
+  NormalizationParams channel_params;
   for(int i=0;i<training_set.rows();i+=pixels){
     E::MatrixXf train_channel=training_set.block(i,0,pixels,training_sz);
     E::MatrixXf test_channel=test_set.block(i,0,pixels,test_sz);
-    normalizeDataset(train_channel,test_channel);
+    normalizeDataset(train_channel,test_channel,
+                     channel_params);
+    params.push_back(channel_params);
     training_set.block(i,0,pixels,training_sz)=train_channel;
     test_set.block(i,0,pixels,test_sz)=test_channel;
   }
 }
 
+void denormalizeSamples(E::MatrixXf& samples,
+                        std::vector<NormalizationParams> params){
+  int pixels_per_channel=samples.rows()/params.size();
+  for(unsigned int i=0;i<params.size();i++){
+    samples.middleRows(i*pixels_per_channel,pixels_per_channel)*=params[i].sigma;
+    samples.middleRows(i*pixels_per_channel,pixels_per_channel).array()+=params[i].mean;
+  }
+}
 
 std::vector<int> stringToVector(std::string str){
     std::vector<int> result;

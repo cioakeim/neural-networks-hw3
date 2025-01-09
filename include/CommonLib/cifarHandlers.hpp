@@ -4,8 +4,10 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include "CommonLib/basicStructs.hpp"
+#include "CommonLib/basicFuncs.hpp"
 #include <Eigen/Dense>
-#include "basicStructs.hpp"
+
 
 
 /**
@@ -86,7 +88,13 @@ public:
    *
    * @param[in] sample The sample to be shown.
   */
-  //void printSample(SamplePoint& sample);
+#ifdef WITH_OPENCV
+  void printSample(const E::MatrixXf& sample,
+                   std::vector<NormalizationParams> params);
+
+  void printMultipleSamples(std::vector<E::MatrixXf> samples,
+                            std::vector<NormalizationParams> params);
+#endif
 
 };
 

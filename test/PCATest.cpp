@@ -17,13 +17,22 @@ int main(){
   Cifar10Handler c10=Cifar10Handler(dataset_path);
   SampleMatrix training_set=c10.getTrainingMatrix(training_size);
   SampleMatrix test_set=c10.getTestMatrix(test_size);
-  /*
-  normalizeDataset(training_set.vectors,
-                   test_set.vectors);
-  */
-  normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
+
+  
+  std::vector<NormalizationParams> params;
+
+  normalizeImageDataset(training_set.vectors, test_set.vectors, 3,
+                        params);
+  for(auto param : params){
+    std::cout<<"Mean: "<<param.mean<<" Sigma: "<<param.sigma<<std::endl;
+  }
   et.stop();
 
+  std::vector<E::MatrixXf> print_samples;
+  for(int i=0;i<5;i++){
+    print_samples.push_back(training_set.vectors.col(i));
+  }
+  c10.printMultipleSamples(print_samples,params);
 
   PCAHandler pca(training_set.vectors);
 
@@ -35,6 +44,20 @@ int main(){
   pca.createEigenPairs();
   std::cout<<"Done"<<std::endl;
 
+  int components_num=512;
+  int test_samples_sz=10;
+  pca.createPrincipalComponents(components_num);
+  E::MatrixXf original=training_set.vectors.middleCols(0,test_samples_sz);
+  E::MatrixXf reconstructed=pca.reconstruct(original);
+  for(int i=0;i<test_samples_sz;i++){
+    std::vector<E::MatrixXf> temp;
+    temp.push_back(original.col(i));
+    temp.push_back(reconstructed.col(i));
+    c10.printMultipleSamples(temp,params);
+  }
+
+
+  /*
   int total_component_sz=training_set.vectors.rows();
   for(int comp_num=124;comp_num<=total_component_sz;comp_num+=124){
     std::cout<<"NUM: "<<comp_num<<std::endl;
@@ -47,6 +70,7 @@ int main(){
     log<<bounded_comp<<","<<info_percentage<<","
       <<J_train<<","<<J_test<<"\n";
   }
+  */
   
   
 

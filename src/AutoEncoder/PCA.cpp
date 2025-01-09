@@ -59,6 +59,13 @@ float PCAHandler::reconstructionMSE(const MatrixXf& dataset){
 }
 
 
+E::MatrixXf PCAHandler::reconstruct(const MatrixXf& input){
+  MatrixXf reconstruction = principal_components*
+    principal_components.transpose()*input;
+  return reconstruction;
+}
+
+
 float PCAHandler::info_percentage(int components_number){
   float energy=0;
   for(int i=0;i<components_number;i++){

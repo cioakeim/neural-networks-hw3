@@ -44,6 +44,8 @@ public:
 
   float reconstructionMSE(const MatrixXf& dataset);
 
+  E::MatrixXf reconstruct(const MatrixXf& input);
+
   float info_percentage(int components_number);
 
   void store();
