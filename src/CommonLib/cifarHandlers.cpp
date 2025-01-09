@@ -161,6 +161,16 @@ void Cifar10Handler::printMultipleSamples(std::vector<E::MatrixXf> samples,
   }
   cv::destroyAllWindows();
 }
+#else
+void Cifar10Handler::printSample(const E::MatrixXf& sample,
+                                 std::vector<NormalizationParams> params){
+    std::cout<<"No image support..."<<std::endl;
+}
+  
+void Cifar10Handler::printMultipleSamples(std::vector<E::MatrixXf> samples,
+                                          std::vector<NormalizationParams> params){
+    std::cout<<"No image support..."<<std::endl;
+}
 #endif
 
 

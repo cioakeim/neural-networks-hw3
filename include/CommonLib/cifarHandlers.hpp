@@ -88,13 +88,11 @@ public:
    *
    * @param[in] sample The sample to be shown.
   */
-#ifdef WITH_OPENCV
   void printSample(const E::MatrixXf& sample,
                    std::vector<NormalizationParams> params);
 
   void printMultipleSamples(std::vector<E::MatrixXf> samples,
                             std::vector<NormalizationParams> params);
-#endif
 
 };
 

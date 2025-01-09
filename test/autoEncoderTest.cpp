@@ -110,6 +110,7 @@ int main(int argc,char* argv[]){
     et.stop();
   }
   // If weights were locked, time to fine-tune
+  int stack_idx=0;
   if(aenc_config.lock_weights){
     std::ofstream log(log_path+"/run_fine_tune.csv");
     if(!log.is_open()){
@@ -124,7 +125,7 @@ int main(int argc,char* argv[]){
     float accuracy;
     et.start("Run epochs");
     std::cout<<"Epochs: "<<std::endl;
-    const int fine_tune_epochs=gen_config.epochs*aenc_config.stack_sizes.size();
+    const int fine_tune_epochs=gen_config.epochs*aenc_config.stack_sizes.size()/3;
     for(int i=0;i<fine_tune_epochs;i++){
       J_train=aenc.runEpoch();
       std::cout<<"Loss: "<<J_train<<std::endl;
@@ -134,9 +135,10 @@ int main(int argc,char* argv[]){
     }
     log.close();
     et.stop();
+    aenc.setStorePath(config_filepath+"/network_"+
+                      std::to_string(stack_idx++));
+    aenc.store();
   }
-  aenc.setStorePath(config_filepath);
-  aenc.store();
 
   et.displayIntervals();
   et.writeToFile(log_path+"/time_info.txt");
