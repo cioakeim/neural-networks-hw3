@@ -28,6 +28,7 @@ protected:
   std::shared_ptr<LayerInterface> output_interface=nullptr;
   // For locking the parameters
   bool lockParams=false;
+  bool isTraining;
 
 public:
   ~BaseLayer()=default;
@@ -39,6 +40,9 @@ public:
   }
   void setOutputInterface(std::shared_ptr<LayerInterface> output_interface){
     this->output_interface=output_interface;
+  }
+  void setTrainingState(bool isTraining){
+    this->isTraining=isTraining;
   }
   // Locking 
   void lock(){

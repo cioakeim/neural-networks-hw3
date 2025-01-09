@@ -55,7 +55,8 @@ struct LayerProperties{
   LayerType layer_type;
   // For optimizer
   OptimizerConfig opt_config;
-
+  // Batch normalization
+  bool batch_normalization;
 };
 
 

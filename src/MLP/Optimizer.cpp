@@ -13,6 +13,7 @@ void Optimizer::setAdam(AdamConfig config){
 
   m=MatrixXf(config.mat_rows,config.mat_cols).setZero();
   u=MatrixXf(config.mat_rows,config.mat_cols).setZero();
+  std::cout<<"Rate: "<<this->rate<<std::endl;
 }
 
 

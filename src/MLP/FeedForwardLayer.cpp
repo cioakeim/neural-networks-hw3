@@ -27,6 +27,13 @@ void FeedForwardLayer::configure(LayerConfig config){
   weights_opt.configure(config.properties.opt_config,weights);
   biases_opt.configure(config.properties.opt_config,biases);
 
+  // Batch normalization
+  batch_normalization=config.properties.batch_normalization;
+  if(batch_normalization){
+    std::cout<<"Batch normalization activated"<<std::endl;
+    norm.init(config.properties.opt_config);
+  }
+
   init();
 }
 
@@ -55,7 +62,16 @@ void FeedForwardLayer::forward(const PassContext& context){
     context.input:input_interface->forward_signal;
   //std::cout<<"Input recognized, dim: "<<input.rows()<<std::endl;
   MatFunction f=output_interface->f;
-  output_interface->forward_signal=f((weights*input).colwise()+biases.col(0));
+  if(batch_normalization){
+    const MatrixXf activation=(weights*input).colwise()+biases.col(0);
+    norm.normalize(activation,isTraining);
+    output_interface->forward_signal=f(
+      (norm.u_norm*norm.scale(1,0)).array()+norm.scale(0,0)
+    );
+  }
+  else{
+    output_interface->forward_signal=f((weights*input).colwise()+biases.col(0));
+  }
   //std::cout<<"Done"<<std::endl;
 }
 
@@ -92,8 +108,17 @@ void FeedForwardLayer::backward(const PassContext& context){
     context.input:input_interface->forward_signal;
   if(input_interface->type!=Input){
     MatFunction func=input_interface->f_dot;
-    input_interface->backward_signal=
-      (weights.transpose()*error).cwiseProduct(func(in));
+    float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
+    if(batch_normalization){
+      input_interface->backward_signal=
+        (weights.transpose()*(c*error)).cwiseProduct(func(in));
+      if(!lockParams)
+        norm.update(error);
+    }
+    else{
+      input_interface->backward_signal=
+        (weights.transpose()*error).cwiseProduct(func(in));
+    }
   }
   if(!lockParams)
     updateWeights(in,error);

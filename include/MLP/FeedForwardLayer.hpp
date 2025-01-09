@@ -3,6 +3,7 @@
 
 #include "MLP/BaseLayer.hpp"
 #include "MLP/Optimizer.hpp"
+#include "MLP/BatchNormalization.hpp"
 
 
 /**
@@ -14,10 +15,15 @@ protected:
   MatrixXf weights;
   MatrixXf biases;
 
+  // Batch normalization flag
+  bool batch_normalization;
+  BatchNormHandler norm;
 
   // For updating
   Optimizer weights_opt;
   Optimizer biases_opt;
+  Optimizer g_opt;
+  Optimizer d_opt;
 
 public:
   
@@ -41,6 +47,7 @@ public:
 
   void setLearningRate(const float rate) override{
     weights_opt.setRate(rate);biases_opt.setRate(rate);
+    if(batch_normalization) norm.opt.setRate(rate);
   };
 
   // For updating

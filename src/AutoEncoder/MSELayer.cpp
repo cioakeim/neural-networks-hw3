@@ -36,8 +36,17 @@ void MSELayer::backward(const PassContext& context){
   // Pass backward if needed
   if(input_interface->type!=Input){
     MatFunction func=input_interface->f_dot;
-    input_interface->backward_signal=
-      (weights.transpose()*error).cwiseProduct(func(in));
+    float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
+    if(batch_normalization){
+      input_interface->backward_signal=
+        (weights.transpose()*(c*error)).cwiseProduct(func(in));
+      if(!lockParams)
+        norm.update(error);
+    }
+    else{
+      input_interface->backward_signal=
+        (weights.transpose()*error).cwiseProduct(func(in));
+    }
   } 
   if(!lockParams){
     updateWeights(in, error);

@@ -23,10 +23,10 @@ int main(int argc,char* argv[]){
   GeneralConfig gen_config;
   gen_config.dataset_path="../data/cifar-10-batches-bin";
   gen_config.run_path="../data/AutoEncoder/default_run";
-  gen_config.training_size=500;
-  gen_config.test_size=1000;
-  gen_config.batch_size=50;
-  gen_config.epochs=3;
+  gen_config.training_size=10000;
+  gen_config.test_size=2000;
+  gen_config.batch_size=100;
+  gen_config.epochs=15;
   OptimizerConfig opt_config;
   opt_config=opt_config;
   opt_config.type=Adam;
@@ -65,6 +65,7 @@ int main(int argc,char* argv[]){
   LayerProperties properties;
   properties.opt_config=opt_config;
   properties.layer_type=MSE;
+  properties.batch_normalization=true;
 
   InterfacePtr input=std::make_shared<LayerInterface>();
   input->width=input->height=32;
@@ -77,6 +78,7 @@ int main(int argc,char* argv[]){
 
   // Layer-wise training
   std::string log_path=config_filepath+"/logs";
+  int stack_idx=0;
   ensure_a_path_exists(log_path);
   for(unsigned int i=0;i<aenc_config.stack_sizes.size();i++){
     const int layer_size=aenc_config.stack_sizes[i];
@@ -108,9 +110,11 @@ int main(int argc,char* argv[]){
     log.close();
     properties.layer_type=layer_type;
     et.stop();
+    aenc.setStorePath(config_filepath+"/network_fine_tuned"+
+                      std::to_string(stack_idx++));
+    aenc.store();
   }
   // If weights were locked, time to fine-tune
-  int stack_idx=0;
   if(aenc_config.lock_weights){
     std::ofstream log(log_path+"/run_fine_tune.csv");
     if(!log.is_open()){
@@ -135,7 +139,7 @@ int main(int argc,char* argv[]){
     }
     log.close();
     et.stop();
-    aenc.setStorePath(config_filepath+"/network_"+
+    aenc.setStorePath(config_filepath+"/network_fine_tuned"+
                       std::to_string(stack_idx++));
     aenc.store();
   }

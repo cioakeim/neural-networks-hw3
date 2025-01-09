@@ -28,7 +28,9 @@ int main(){
   normalizeDataset(training_set.vectors,
                    test_set.vectors);
   */
-  normalizeImageDataset(training_set.vectors, test_set.vectors, 3);
+  std::vector<NormalizationParams> params;
+  normalizeImageDataset(training_set.vectors, test_set.vectors, 3,
+                        params);
   et.stop();
 
   
