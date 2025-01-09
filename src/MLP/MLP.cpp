@@ -130,6 +130,7 @@ void MLP::testModel(const SampleMatrix& set,
 void MLP::store(){
   std::cout<<"Storing network"<<std::endl;
   // Create directory
+  std::cout<<"Store path: "<<store_path<<std::endl;
   ensure_a_path_exists(store_path);
   for(size_t i=0;i<layers.size();i++){
     layers[i]->store();
@@ -138,7 +139,7 @@ void MLP::store(){
 
 
 void MLP::load(){
-  ensure_a_path_exists(store_path);
+  std::cout<<"Loading network"<<std::endl;
   for(size_t i=0;i<layers.size();i++){
     layers[i]->load();
   }

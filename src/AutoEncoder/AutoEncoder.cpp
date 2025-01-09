@@ -1,6 +1,7 @@
 #include "AutoEncoder/AutoEncoder.hpp"
 #include "MLP/FeedForwardLayer.hpp"
 #include "AutoEncoder/MSELayer.hpp"
+#include "AutoEncoder/Config.hpp"
 #include "MLP/ActivationFunctions.hpp"
 #include <iostream>
 
@@ -136,6 +137,41 @@ void AutoEncoder::setLearningRate(const float rate){
 }
 
 
+void AutoEncoder::loadFromConfigPath(std::string config_filepath){
+  GeneralConfig gen_config;
+  OptimizerConfig opt_config;
+  AutoEncoderConfig aenc_config;
+  configGeneral(gen_config,config_filepath+"/general.txt");
+  configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
+  configOptimizer(opt_config,config_filepath+"/opt.txt");
+  setWeightsLockable(aenc_config.lock_weights);
+  // For optimizer config
+  LayerProperties properties;
+  properties.opt_config=opt_config;
+  properties.layer_type=MSE;
+  // Input interface
+  InterfacePtr input=std::make_shared<LayerInterface>();
+  input->width=input->height=32;
+  input->channels=3;
+  input->f=aenc_config.f;
+  input->f_dot=aenc_config.f_dot;
+  addInterfaceStack(input);
+  // Add all other interfaces
+  for(unsigned int i=0;i<aenc_config.stack_sizes.size();i++){
+    const int layer_size=aenc_config.stack_sizes[i];
+    const LayerType layer_type=aenc_config.stack_types[i];
+    InterfacePtr interface=std::make_shared<LayerInterface>(*input);
+    interface->height=layer_size;
+    interface->width=interface->channels=1;
+    addInterfaceStack(interface);
+    std::cout<<"Cool"<<std::endl;
+    addLayerStack(properties);
+    std::cout<<"Cool"<<std::endl;
+    properties.layer_type=layer_type;
+  }
+  setStorePath(config_filepath);
+  load();
+}
 
 
 

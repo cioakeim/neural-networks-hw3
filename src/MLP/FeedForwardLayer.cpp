@@ -115,7 +115,9 @@ void FeedForwardLayer::updateWeights(const MatrixXf& input,
 
 // I/O
 void FeedForwardLayer::store(){
+  std::cout<<"Ensure: "<<store_path<<std::endl;
   ensure_a_path_exists(store_path);
+  std::cout<<"Ensured"<<std::endl;
   storeMatrixToFile(store_path+"/weights.csv",
                     weights);
   storeMatrixToFile(store_path+"/biases.csv",
@@ -124,7 +126,9 @@ void FeedForwardLayer::store(){
 
 
 void FeedForwardLayer::load(){
+  std::cout<<"Ensure: "<<store_path<<std::endl;
   ensure_a_path_exists(store_path);
+  std::cout<<"Ensured"<<std::endl;
   weights=loadMatrixFromFile(store_path+"/weights.csv");
   biases=loadMatrixFromFile(store_path+"/biases.csv");
 }

@@ -46,6 +46,7 @@ public:
   // For only encoding matrices
   MatrixXf encode(MatrixXf& set);
    
+  void loadFromConfigPath(std::string config_filepath);
   
 
 

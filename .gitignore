@@ -35,3 +35,6 @@ build/
 data/cifar-10-batches-bin
 data/PCA
 compile_flags.txt
+
+data/**/weights.csv
+data/**/biases.csv

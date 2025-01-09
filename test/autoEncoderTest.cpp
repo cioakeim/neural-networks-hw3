@@ -58,7 +58,6 @@ int main(int argc,char* argv[]){
 
 
   AutoEncoder aenc=AutoEncoder(training_set,test_set,gen_config.batch_size);
-  aenc.setStorePath(config_filepath);
   aenc.setWeightsLockable(aenc_config.lock_weights);
   std::cout<<"Cool"<<std::endl;
 
@@ -98,6 +97,7 @@ int main(int argc,char* argv[]){
     et.start("Run epochs");
     std::cout<<"Epochs: "<<std::endl;
     for(int i=0;i<gen_config.epochs;i++){
+      std::cout<<"Epoch: "<<i<<std::endl;
       J_train=aenc.runEpoch();
       std::cout<<"Loss: "<<J_train<<std::endl;
       aenc.testModel(test_set, J_test, accuracy);
@@ -134,8 +134,8 @@ int main(int argc,char* argv[]){
     log.close();
     et.stop();
   }
-  
-
+  aenc.setStorePath(config_filepath);
+  aenc.store();
 
   et.displayIntervals();
   et.writeToFile(log_path+"/time_info.txt");
