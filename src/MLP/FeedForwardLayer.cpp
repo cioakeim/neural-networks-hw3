@@ -106,8 +106,8 @@ void FeedForwardLayer::backward(const PassContext& context){
     context.input:input_interface->forward_signal;
   if(input_interface->type!=Input){
     MatFunction func=input_interface->f_dot;
-    float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
     if(batch_normalization){
+      float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
       input_interface->backward_signal=
         (weights.transpose()*(c*error)).cwiseProduct(func(in));
       if(!lockParams)
