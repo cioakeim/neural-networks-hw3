@@ -65,7 +65,7 @@ int main(int argc,char* argv[]){
   LayerProperties properties;
   properties.opt_config=opt_config;
   properties.layer_type=MSE;
-  properties.batch_normalization=true;
+  properties.batch_normalization=false;
 
   InterfacePtr input=std::make_shared<LayerInterface>();
   input->width=input->height=32;

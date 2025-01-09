@@ -57,14 +57,13 @@ void FeedForwardLayer::init(){
 
 
 void FeedForwardLayer::forward(const PassContext& context){
-  //std::cout<<"Forward, converting to: "<<weights.rows()<<std::endl;
   const MatrixXf& input=(input_interface->type==Input)?
     context.input:input_interface->forward_signal;
   //std::cout<<"Input recognized, dim: "<<input.rows()<<std::endl;
   MatFunction f=output_interface->f;
   if(batch_normalization){
     const MatrixXf activation=(weights*input).colwise()+biases.col(0);
-    norm.normalize(activation,isTraining);
+    norm.normalize(activation,isTraining & (!lockParams));
     output_interface->forward_signal=f(
       (norm.u_norm*norm.scale(1,0)).array()+norm.scale(0,0)
     );
@@ -72,7 +71,6 @@ void FeedForwardLayer::forward(const PassContext& context){
   else{
     output_interface->forward_signal=f((weights*input).colwise()+biases.col(0));
   }
-  //std::cout<<"Done"<<std::endl;
 }
 
 

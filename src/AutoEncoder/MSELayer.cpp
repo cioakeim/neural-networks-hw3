@@ -26,7 +26,6 @@ int MSELayer::prediction_success(const PassContext& context){
 
 
 void MSELayer::backward(const PassContext& context){
-
   const float lambda=2;
   // Derivative in MSE is just y_bar-y 
   const MatrixXf& output=output_interface->forward_signal;
@@ -36,8 +35,8 @@ void MSELayer::backward(const PassContext& context){
   // Pass backward if needed
   if(input_interface->type!=Input){
     MatFunction func=input_interface->f_dot;
-    float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
     if(batch_normalization){
+      float c=norm.scale(1,0)/sqrt(norm.var+EPSILON);
       input_interface->backward_signal=
         (weights.transpose()*(c*error)).cwiseProduct(func(in));
       if(!lockParams)
