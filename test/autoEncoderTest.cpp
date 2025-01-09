@@ -110,7 +110,7 @@ int main(int argc,char* argv[]){
     log.close();
     properties.layer_type=layer_type;
     et.stop();
-    aenc.setStorePath(config_filepath+"/network_fine_tuned"+
+    aenc.setStorePath(config_filepath+"/network_"+
                       std::to_string(stack_idx++));
     aenc.store();
   }
@@ -129,7 +129,7 @@ int main(int argc,char* argv[]){
     float accuracy;
     et.start("Run epochs");
     std::cout<<"Epochs: "<<std::endl;
-    const int fine_tune_epochs=gen_config.epochs*aenc_config.stack_sizes.size()/3;
+    const int fine_tune_epochs=(3*gen_config.epochs)/2;
     for(int i=0;i<fine_tune_epochs;i++){
       J_train=aenc.runEpoch();
       std::cout<<"Loss: "<<J_train<<std::endl;
@@ -139,8 +139,7 @@ int main(int argc,char* argv[]){
     }
     log.close();
     et.stop();
-    aenc.setStorePath(config_filepath+"/network_fine_tuned"+
-                      std::to_string(stack_idx++));
+    aenc.setStorePath(config_filepath+"/network_fine_tuned");
     aenc.store();
   }
 
