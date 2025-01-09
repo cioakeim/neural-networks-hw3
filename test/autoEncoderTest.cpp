@@ -67,6 +67,14 @@ int main(int argc,char* argv[]){
   properties.layer_type=MSE;
   properties.batch_normalization=true;
 
+  std::cout<<"Batch normalization: "<<properties.batch_normalization<<std::endl;
+  std::cout<<"Layers: "<<std::endl;
+  for(auto& layer_sz: aenc_config.stack_sizes){
+    std::cout<<layer_sz<<" ";
+  }
+  std::cout<<std::endl;
+
+
   InterfacePtr input=std::make_shared<LayerInterface>();
   input->width=input->height=32;
   input->channels=3;

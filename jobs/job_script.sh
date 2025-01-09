@@ -10,10 +10,10 @@
 module load gcc/13.2.0-iqpfkya cmake/3.27.9-nmh6tto eigen/3.4.0-titj7ys 
 
 MY_HOME="/home/c/cioakeim"
-#MY_HOME="/home/chris"
+MY_HOME="/home/chris"
 
 project_dir="/home/c/cioakeim/nns/neural-networks-hw3"
-#project_dir="/home/chris/Documents/programms/nns/neural-networks-hw3"
+project_dir="/home/chris/Documents/programms/nns/neural-networks-hw3"
 
 source $MY_HOME/aocl/5.0.0/aocc/amd-libs.cfg
 

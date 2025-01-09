@@ -7,6 +7,7 @@
  * @brief Extension of Feedforward with mse loss 
 */
 class MSELayer : public FeedForwardLayer{
+public:
   void configure(LayerConfig config) override;
 
   void forward(const PassContext& context) override;
@@ -16,8 +17,8 @@ class MSELayer : public FeedForwardLayer{
 
   void backward(const PassContext& context) override;
 
-  MatrixXf initialError(const PassContext& context,
-                        const MatrixXf& output);
+  virtual MatrixXf initialError(const PassContext& context,
+                                const MatrixXf& output);
 
 };
 
