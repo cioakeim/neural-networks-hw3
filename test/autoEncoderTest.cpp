@@ -48,6 +48,10 @@ int main(int argc,char* argv[]){
     configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
     configOptimizer(opt_config,config_filepath+"/opt.txt");
   }
+  gen_config.training_size=200;
+  gen_config.test_size=200;
+  gen_config.batch_size=100;
+  gen_config.epochs=5;
 
   et.start("Load dataset");
   Cifar10Handler c10=Cifar10Handler(gen_config.dataset_path);

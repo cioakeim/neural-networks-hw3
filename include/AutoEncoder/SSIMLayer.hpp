@@ -5,8 +5,15 @@
 
 class SSIMLayer: public MSELayer{
 protected:
-  MatrixXf mx;
-  MatrixXf varx;
+  // Temp vars for no recalculating
+  VectorXf mx;
+  VectorXf varx;
+  VectorXf my;
+  VectorXf vary;
+  VectorXf cov;
+  VectorXf nom;
+  VectorXf den;
+
   float loss(const PassContext& context) override;
 
   MatrixXf initialError(const PassContext& context,
