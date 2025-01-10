@@ -4,8 +4,10 @@
 void BatchNormHandler::init(OptimizerConfig opt_config){
   mean=0; var=1;
   scale=E::MatrixXf(2,1);
+  /*
   opt_config.adam.rate/=10;
   opt_config.sgd.rate/=10;
+  */
   opt.configure(opt_config, scale);
   scale(0,0)=0;
   scale(1,0)=1;

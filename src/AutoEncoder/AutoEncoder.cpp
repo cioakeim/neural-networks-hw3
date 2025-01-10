@@ -88,6 +88,7 @@ void AutoEncoder::addLayerStack(LayerProperties properties){
   // For decoding stack
   config.input_interface=encoded_product;
   config.output_interface=dec_interfaces.back();
+  config.properties.batch_normalization=false;
   std::cout<<"Here good"<<std::endl;
   dec_stack.back()->configure(config);
 

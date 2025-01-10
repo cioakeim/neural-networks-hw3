@@ -6,6 +6,7 @@
 #define EIGEN_USE_LAPACK
 #endif
 #include <Eigen/Dense>
+#include <iostream>
 
 namespace E=Eigen;
 using E::MatrixXf;
@@ -52,7 +53,10 @@ private:
 public:
   Optimizer(){};
 
-  void setRate(const float rate){this->rate=rate;}
+  void setRate(const float rate){
+    std::cout<<"New rate: "<<rate<<std::endl;
+    this->rate=rate;
+  }
 
   void setAdam(AdamConfig config);
                

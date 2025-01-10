@@ -36,7 +36,7 @@ struct BatchNormHandler{
   }
 
   void setRate(float rate){
-    opt.setRate(rate/10);
+    opt.setRate(rate);
   }
 
   // Normalization either in training or inference

@@ -23,14 +23,14 @@ int main(int argc,char* argv[]){
   GeneralConfig gen_config;
   gen_config.dataset_path="../data/cifar-10-batches-bin";
   gen_config.run_path="../data/AutoEncoder/default_run";
-  gen_config.training_size=10000;
-  gen_config.test_size=2000;
+  gen_config.training_size=500;
+  gen_config.test_size=200;
   gen_config.batch_size=100;
-  gen_config.epochs=15;
+  gen_config.epochs=30;
   OptimizerConfig opt_config;
   opt_config=opt_config;
   opt_config.type=Adam;
-  opt_config.adam.rate=5e-4;
+  opt_config.adam.rate=2.5e-4;
   opt_config.adam.beta_1=0.9;
   opt_config.adam.beta_2=0.999;
   AutoEncoderConfig aenc_config;
@@ -48,10 +48,6 @@ int main(int argc,char* argv[]){
     configAutoEncoder(aenc_config,config_filepath+"/aenc.txt");
     configOptimizer(opt_config,config_filepath+"/opt.txt");
   }
-  gen_config.training_size=200;
-  gen_config.test_size=200;
-  gen_config.batch_size=100;
-  gen_config.epochs=5;
 
   et.start("Load dataset");
   Cifar10Handler c10=Cifar10Handler(gen_config.dataset_path);
@@ -91,8 +87,10 @@ int main(int argc,char* argv[]){
   // Layer-wise training
   std::string log_path=config_filepath+"/logs";
   int stack_idx=0;
+  const float gamma=0.7;
   ensure_a_path_exists(log_path);
   for(unsigned int i=0;i<aenc_config.stack_sizes.size();i++){
+    float rate=(opt_config.type==Adam)?opt_config.adam.rate:opt_config.sgd.rate;
     const int layer_size=aenc_config.stack_sizes[i];
     const LayerType layer_type=aenc_config.stack_types[i];
     std::ofstream log(log_path+"/run_"+std::to_string(layer_size)+".csv");
@@ -109,6 +107,7 @@ int main(int argc,char* argv[]){
     std::cout<<"Cool"<<std::endl;
     float J_train,J_test;
     float accuracy;
+    aenc.setLearningRate(rate);
     et.start("Run epochs");
     std::cout<<"Epochs: "<<std::endl;
     for(int i=0;i<gen_config.epochs;i++){
@@ -118,13 +117,20 @@ int main(int argc,char* argv[]){
       aenc.testModel(test_set, J_test, accuracy);
       std::cout<<"Test loss: "<<J_test<<std::endl;
       log<<i<<","<<J_train<<","<<J_test<<"\n";
+      // Step decay
+      if((i+1)%10==0){
+        rate=gamma*rate;
+        aenc.setLearningRate(rate);
+      }
     }
     log.close();
     properties.layer_type=layer_type;
     et.stop();
+    /*
     aenc.setStorePath(config_filepath+"/network_"+
                       std::to_string(stack_idx++));
     aenc.store();
+    */
   }
   // If weights were locked, time to fine-tune
   if(aenc_config.lock_weights){
