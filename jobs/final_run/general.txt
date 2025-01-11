@@ -1,6 +1,0 @@
-../data/cifar-10-batches-bin
-../data/AutoEncoder/depth/deep
-50000
-10000
-100
-60

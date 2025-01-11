@@ -1,0 +1,6 @@
+Load dataset (s), 1.18006
+Run epochs (s), 1275.15
+Run epochs (s), 1844.44
+Run epochs (s), 1675.67
+Run epochs (s), 1382.38
+Run epochs (s), 8071.29
