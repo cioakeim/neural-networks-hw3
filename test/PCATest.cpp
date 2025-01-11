@@ -40,13 +40,15 @@ int main(){
   std::ofstream log(store_path+"/log.csv");
   log<<"Components #,Info percentage,TrainMSE,TestMSE"<<"\n";
 
+  et.start("Train");
   pca.createCovarianceMatrix();
   pca.createEigenPairs();
   std::cout<<"Done"<<std::endl;
 
-  int components_num=512;
+  int components_num=124;
   int test_samples_sz=10;
   pca.createPrincipalComponents(components_num);
+  et.stop();
   E::MatrixXf original=training_set.vectors.middleCols(0,test_samples_sz);
   E::MatrixXf reconstructed=pca.reconstruct(original);
   for(int i=0;i<test_samples_sz;i++){

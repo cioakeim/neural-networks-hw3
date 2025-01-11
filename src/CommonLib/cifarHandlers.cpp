@@ -143,7 +143,10 @@ void Cifar10Handler::printSample(const E::MatrixXf& sample,
   cv::Mat largerImage;
   cv::resize(image, largerImage, cv::Size(), 10.0, 10.0);
 
-  cv::imshow("Sample"+std::to_string(image_cnt++),largerImage);
+  cv::imshow("Sample"+std::to_string(image_cnt),largerImage);
+  std::vector<int> save_params = {cv::IMWRITE_JPEG_QUALITY, 95}; // Quality 95
+  cv::imwrite("output_"+std::to_string(image_cnt++)+".png", image, save_params);
+
 }
 
 

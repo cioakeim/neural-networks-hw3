@@ -118,10 +118,6 @@ int main(int argc,char* argv[]){
       std::cout<<"Test loss: "<<J_test<<std::endl;
       log<<i<<","<<J_train<<","<<J_test<<"\n";
       // Step decay
-      if((i+1)%10==0){
-        rate=gamma*rate;
-        aenc.setLearningRate(rate);
-      }
     }
     log.close();
     properties.layer_type=layer_type;
@@ -141,13 +137,13 @@ int main(int argc,char* argv[]){
     }
     float rate=(opt_config.type==Adam)?
       (opt_config.adam.rate):(opt_config.sgd.rate);
-    aenc.setLearningRate(rate/10);
+    aenc.setLearningRate(rate/5);
     aenc.unlockAll();
     float J_train,J_test;
     float accuracy;
     et.start("Run epochs");
     std::cout<<"Epochs: "<<std::endl;
-    const int fine_tune_epochs=(3*gen_config.epochs)/2;
+    const int fine_tune_epochs=gen_config.epochs;
     for(int i=0;i<fine_tune_epochs;i++){
       J_train=aenc.runEpoch();
       std::cout<<"Loss: "<<J_train<<std::endl;
